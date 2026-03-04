@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1772644025776,
+  "lastUpdated": 1772665266052,
   "healthScore": 100,
   "jobs": [
     {
@@ -7,8 +7,8 @@
       "name": "Heartbeat Checks",
       "enabled": true,
       "schedule": "Every 1 hour",
-      "nextRun": 1772647625776,
-      "lastRun": 1772642225776,
+      "nextRun": 1772668866052,
+      "lastRun": 1772663466052,
       "status": "active",
       "description": "Periodic check-ins: reviews HEARTBEAT.md, monitors emails/calendar, performs proactive maintenance, posts daily briefings at 8 AM",
       "source": "OpenClaw Agent",
@@ -51,6 +51,17 @@
       "type": "Data Sync"
     },
     {
+      "id": "0e685e05-cf65-4596-9d74-cdc8b240afb3",
+      "name": "natural-foundations-ghl-refresh",
+      "enabled": true,
+      "schedule": "31 7 * * *",
+      "nextRun": 1772713860000,
+      "status": "active",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
       "id": "bbe5cc80-63dc-4ebd-a2a8-278dc39d671b",
       "name": "daily-briefing",
       "enabled": true,
@@ -75,6 +86,10 @@
     {
       "name": "apex-ghl-refresh",
       "time": 1772713800000
+    },
+    {
+      "name": "natural-foundations-ghl-refresh",
+      "time": 1772713860000
     },
     {
       "name": "daily-briefing",
