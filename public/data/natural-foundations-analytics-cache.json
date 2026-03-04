@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1772656252206,
+  "lastUpdated": 1772657728432,
   "locationId": "K8Ch9TAp0gPQNwdiMjw1",
   "clinicName": "Natural Foundations",
   "metrics": [
@@ -12,7 +12,7 @@
       "exams": 7,
       "commits": 4,
       "selfScheduled": 0,
-      "adSpend": 7091.53
+      "adSpend": 1000.11
     },
     {
       "month": "2025-07",
@@ -23,7 +23,7 @@
       "exams": 12,
       "commits": 7,
       "selfScheduled": 0,
-      "adSpend": 3833.16
+      "adSpend": 2623.56
     },
     {
       "month": "2025-08",
@@ -34,7 +34,7 @@
       "exams": 9,
       "commits": 5,
       "selfScheduled": 0,
-      "adSpend": 3155.41
+      "adSpend": 2041.82
     },
     {
       "month": "2025-09",
@@ -45,7 +45,7 @@
       "exams": 11,
       "commits": 2,
       "selfScheduled": 0,
-      "adSpend": 1865.85
+      "adSpend": 1885.64
     },
     {
       "month": "2025-10",
@@ -56,7 +56,7 @@
       "exams": 12,
       "commits": 5,
       "selfScheduled": 0,
-      "adSpend": 155.24
+      "adSpend": 2440.23
     },
     {
       "month": "2025-11",
@@ -67,7 +67,7 @@
       "exams": 11,
       "commits": 6,
       "selfScheduled": 0,
-      "adSpend": 754.25
+      "adSpend": 2116.8
     },
     {
       "month": "2025-12",
@@ -78,7 +78,7 @@
       "exams": 12,
       "commits": 6,
       "selfScheduled": 0,
-      "adSpend": 1361.32
+      "adSpend": 2054.42
     },
     {
       "month": "2026-01",
@@ -89,7 +89,7 @@
       "exams": 15,
       "commits": 2,
       "selfScheduled": 0,
-      "adSpend": 2161.5
+      "adSpend": 2046.73
     },
     {
       "month": "2026-02",
@@ -100,7 +100,7 @@
       "exams": 7,
       "commits": 2,
       "selfScheduled": 0,
-      "adSpend": 2748.73
+      "adSpend": 2088.29
     },
     {
       "month": "2026-03",
@@ -111,7 +111,7 @@
       "exams": 2,
       "commits": 0,
       "selfScheduled": 0,
-      "adSpend": 496.57
+      "adSpend": 213.94
     }
   ]
 }
