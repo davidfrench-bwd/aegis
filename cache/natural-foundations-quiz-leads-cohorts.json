@@ -1,0 +1,62 @@
+[
+  {
+    "month": "2025-06",
+    "quizLeads": 31,
+    "exams": 7,
+    "commits": 4
+  },
+  {
+    "month": "2025-07",
+    "quizLeads": 73,
+    "exams": 11,
+    "commits": 7
+  },
+  {
+    "month": "2025-08",
+    "quizLeads": 63,
+    "exams": 9,
+    "commits": 5
+  },
+  {
+    "month": "2025-09",
+    "quizLeads": 46,
+    "exams": 11,
+    "commits": 2
+  },
+  {
+    "month": "2025-10",
+    "quizLeads": 61,
+    "exams": 12,
+    "commits": 5
+  },
+  {
+    "month": "2025-11",
+    "quizLeads": 57,
+    "exams": 11,
+    "commits": 6
+  },
+  {
+    "month": "2025-12",
+    "quizLeads": 46,
+    "exams": 12,
+    "commits": 6
+  },
+  {
+    "month": "2026-01",
+    "quizLeads": 49,
+    "exams": 15,
+    "commits": 2
+  },
+  {
+    "month": "2026-02",
+    "quizLeads": 38,
+    "exams": 7,
+    "commits": 2
+  },
+  {
+    "month": "2026-03",
+    "quizLeads": 5,
+    "exams": 2,
+    "commits": 0
+  }
+]

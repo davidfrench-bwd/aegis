@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Clinic Analytics - Aegis</title>
+    <link rel="stylesheet" href="/dashboard/style.css">
+    <link rel="stylesheet" href="/dashboard/pages/analytics.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="clinicName">📊 Clinic Analytics</h1>
+            <p class="subtitle" id="clinicSubtitle">Loading clinic data...</p>
+            <nav class="breadcrumb">
+                <a href="/dashboard/">Dashboard</a> / 
+                <a href="/dashboard/pages/clinics.html">Clinics</a> / 
+                <span id="breadcrumbName">Analytics</span>
+            </nav>
+        </header>
+
+        <!-- Totals Summary -->
+        <div class="card">
+            <h2>📊 Overall Totals</h2>
+            <div id="totalsSummary" class="totals-grid">
+                <div class="loading">Calculating totals...</div>
+            </div>
+        </div>
+
+        <!-- Conversion Rates -->
+        <div class="card">
+            <h2>📈 Conversion Rates</h2>
+            <div id="conversionRates" class="totals-grid">
+                <div class="loading">Calculating conversion rates...</div>
+            </div>
+        </div>
+
+        <!-- Cohort Breakdown by Month -->
+        <div class="card">
+            <h2>📅 Monthly Cohort Breakdown</h2>
+            <div id="cohortBreakdown" class="cohort-table">
+                <div class="loading">Loading cohort data...</div>
+            </div>
+        </div>
+
+        <!-- Ad Performance -->
+        <div class="card">
+            <h2>📱 Ad Performance</h2>
+            <div id="adPerformance" class="ad-metrics">
+                <div class="loading">Loading ad data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/dashboard/pages/analytics.js"></script>
+</body>
+</html>

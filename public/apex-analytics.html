@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Pain Solutions Analytics — Aegis Dashboard</title>
+    <link rel="stylesheet" href="/dashboard/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-client.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 APEX PAIN SOLUTIONS</h1>
+            <p class="subtitle">Greenville, SC — Clinic Performance Dashboard</p>
+            <nav class="main-nav" id="mainNav">
+                <!-- Admin-only links will be added via JavaScript -->
+            </nav>
+            <div class="last-update">
+                <span id="lastUpdate">Loading...</span>
+            </div>
+        </header>
+
+        <div id="analytics-container">
+            <div class="card">
+                <h2>Loading analytics data...</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/data/apex-analytics-cache.json?t=' + Date.now());
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                displayAnalytics(data);
+                document.getElementById('lastUpdate').textContent = 
+                    `Last updated: ${new Date(data.lastUpdated).toLocaleString()}`;
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                document.getElementById('analytics-container').innerHTML = `
+                    <div class="card">
+                        <h2>❌ Error Loading Data</h2>
+                        <p>${error.message}</p>
+                        <p style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">
+                            The analytics cache may not be initialized yet. Check back after the next data refresh (daily at 7:30 AM).
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayAnalytics(data) {
+            const container = document.getElementById('analytics-container');
+            const metrics = data.metrics || [];
+            
+            if (metrics.length === 0) {
+                container.innerHTML = `
+                    <div class="card">
+                        <h2>⚠️ No Data Available</h2>
+                        <p>Waiting for first data sync at 7:30 AM daily.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculate 12-month totals
+            const recentMonths = metrics.slice(-12);
+            let total12MonthRevenue = 0;
+            let total12MonthAdSpend = 0;
+            
+            recentMonths.forEach(m => {
+                const examCash = m.exams * 49;
+                const commitCash = m.commits * 4000;
+                total12MonthRevenue += examCash + commitCash;
+                total12MonthAdSpend += (m.adSpend || 0);
+            });
+            
+            const total12MonthROAS = total12MonthAdSpend > 0 ? (total12MonthRevenue / total12MonthAdSpend).toFixed(2) : '0.00';
+            const total12MonthROASDollar = total12MonthRevenue - total12MonthAdSpend;
+            
+            // Summary card
+            const summaryHtml = `
+                <div class="card" style="margin-bottom: 30px; border: 2px solid #a855f7;">
+                    <h2 style="margin-bottom: 20px; color: #a855f7;">📊 Last 12 Months Summary</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div style="background: #0a0e27; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #10b981;">$${total12MonthRevenue.toLocaleString()}</div>
+                            <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 4px;">Total Revenue</div>
+                        </div>
+                        <div style="background: #0a0e27; padding: 20px; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #ef4444;">$${total12MonthAdSpend.toLocaleString()}</div>
+                            <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 4px;">Total Ad Spend</div>
+                        </div>
+                        <div style="background: #0a0e27; padding: 20px; border-radius: 8px; border: 2px solid #a855f7;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #a855f7;">$${total12MonthROASDollar.toLocaleString()}</div>
+                            <div style="font-size: 1rem; font-weight: 600; color: #a855f7; margin-top: 4px;">${total12MonthROAS}x</div>
+                            <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 4px;">Return On Ad Spend</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Display as cards (newest first)
+            const monthCardsReversed = recentMonths.slice().reverse();
+            
+            const cardsHtml = monthCardsReversed.map(m => {
+                const leadBookingRate = m.leads > 0 ? ((m.phoneConsults / m.leads) * 100).toFixed(1) : '0.0';
+                const consultShowRate = m.phoneConsults > 0 ? (((m.phoneConsults - m.phoneConsultNoShows) / m.phoneConsults) * 100).toFixed(1) : '0.0';
+                const shows = m.phoneConsults - m.phoneConsultNoShows;
+                const examBookingRate = shows > 0 ? ((m.exams / shows) * 100).toFixed(1) : '0.0';
+                const commitRate = m.exams > 0 ? ((m.commits / m.exams) * 100).toFixed(1) : '0.0';
+                const examCash = m.exams * 49;
+                const commitCash = m.commits * 4000;
+                const totalRevenue = examCash + commitCash;
+                const adSpend = m.adSpend || 0;
+                const roasMultiplier = adSpend > 0 ? (totalRevenue / adSpend).toFixed(2) : '0.00';
+                const roasDollar = totalRevenue - adSpend;
+                
+                return `
+                    <div class="card" style="margin-bottom: 20px;">
+                        <h2 style="margin-bottom: 20px; color: #00d9ff;">${m.month}</h2>
+                        
+                        <!-- Volume Metrics -->
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase;">Volume</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0;">${m.leads}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Leads</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0;">${m.phoneConsults}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Consults</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0;">${m.phoneConsultNoShows}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">No Shows</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0;">${m.exams}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Exams</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0;">${m.commits}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Commits</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #e2e8f0;">${m.selfScheduled}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Self-Sched</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Conversion Rates -->
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase;">Conversion Rates</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">${leadBookingRate}%</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Lead Booking Rate</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">${consultShowRate}%</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Consult Show Rate</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">${examBookingRate}%</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Exam Booking Rate</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">${commitRate}%</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Commit Rate</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Revenue & Ad Spend -->
+                        <div>
+                            <h3 style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase;">Revenue & Ad Spend</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">$${examCash.toLocaleString()}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Exam Cash</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">$${commitCash.toLocaleString()}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Commit Cash</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px; border: 2px solid #f59e0b;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">$${totalRevenue.toLocaleString()}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Total Revenue</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #ef4444;">$${adSpend.toLocaleString()}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Ad Spend</div>
+                                </div>
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px; border: 2px solid #a855f7;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #a855f7;">$${roasDollar.toLocaleString()}</div>
+                                    <div style="font-size: 0.875rem; font-weight: 600; color: #a855f7; margin-top: 4px;">${roasMultiplier}x</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Return On Ad Spend</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = summaryHtml + cardsHtml;
+        }
+
+        // Initialize with auth check
+        (async () => {
+            // Check if user has access to apex clinic
+            const hasAccess = await canAccessClinic('apex');
+            if (!hasAccess) {
+                alert('You do not have access to this dashboard');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Get user profile to check if admin
+            const user = await getCurrentUser();
+            const profile = await getUserProfile(user.id);
+            const nav = document.querySelector('.main-nav');
+            
+            // Add admin-only navigation links
+            if (profile.role === 'admin') {
+                const clinicsLink = document.createElement('a');
+                clinicsLink.href = '/clinic-cards.html';
+                clinicsLink.className = 'nav-link';
+                clinicsLink.textContent = '← Back to Clinics';
+                nav.appendChild(clinicsLink);
+                
+                const npeLink = document.createElement('a');
+                npeLink.href = '/npe.html';
+                npeLink.className = 'nav-link';
+                npeLink.textContent = '🏥 NPE Overview';
+                nav.appendChild(npeLink);
+            }
+            
+            // Add logout button
+            const logoutBtn = document.createElement('a');
+            logoutBtn.textContent = '🚪 Logout';
+            logoutBtn.className = 'nav-link';
+            logoutBtn.style.background = '#ef4444';
+            logoutBtn.style.cursor = 'pointer';
+            logoutBtn.onclick = async (e) => {
+                e.preventDefault();
+                await signOut();
+                window.location.href = '/login.html';
+            };
+            nav.appendChild(logoutBtn);
+            
+            loadAnalytics();
+            
+            // Reload data every 60 seconds
+            setInterval(loadAnalytics, 60000);
+        })();
+    </script>
+</body>
+</html>

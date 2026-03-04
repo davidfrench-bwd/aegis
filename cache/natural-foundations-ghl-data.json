@@ -1,0 +1,13 @@
+{
+  "location": "Natural Foundations",
+  "locationId": "K8Ch9TAp0gPQNwdiMjw1",
+  "counts": {
+    "quizLeads": 20,
+    "consultBooked": 20,
+    "consultNoShow": 0,
+    "consultCompleted": 20,
+    "consultCancelled": 0,
+    "newPatient": 20
+  },
+  "lastUpdated": "2026-03-04T18:31:07.474Z"
+}

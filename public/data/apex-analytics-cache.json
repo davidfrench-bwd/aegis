@@ -1,0 +1,172 @@
+{
+  "lastUpdated": 1772627494827,
+  "locationId": "o9ApBFHMmBmZQYAeTByK",
+  "clinicName": "Apex Pain Solutions",
+  "metrics": [
+    {
+      "month": "2025-01",
+      "leads": 115,
+      "phoneConsults": 68,
+      "phoneConsultShows": 58,
+      "phoneConsultNoShows": 10,
+      "exams": 37,
+      "commits": 12,
+      "selfScheduled": 8,
+      "adSpend": 3793.22
+    },
+    {
+      "month": "2025-02",
+      "leads": 93,
+      "phoneConsults": 53,
+      "phoneConsultShows": 43,
+      "phoneConsultNoShows": 10,
+      "exams": 28,
+      "commits": 10,
+      "selfScheduled": 11,
+      "adSpend": 3668.24
+    },
+    {
+      "month": "2025-03",
+      "leads": 127,
+      "phoneConsults": 71,
+      "phoneConsultShows": 62,
+      "phoneConsultNoShows": 9,
+      "exams": 48,
+      "commits": 30,
+      "selfScheduled": 3,
+      "adSpend": 4508.89
+    },
+    {
+      "month": "2025-04",
+      "leads": 155,
+      "phoneConsults": 90,
+      "phoneConsultShows": 52,
+      "phoneConsultNoShows": 38,
+      "exams": 35,
+      "commits": 21,
+      "selfScheduled": 11,
+      "adSpend": 5655.26
+    },
+    {
+      "month": "2025-05",
+      "leads": 188,
+      "phoneConsults": 110,
+      "phoneConsultShows": 61,
+      "phoneConsultNoShows": 49,
+      "exams": 40,
+      "commits": 16,
+      "selfScheduled": 34,
+      "adSpend": 7299.03
+    },
+    {
+      "month": "2025-06",
+      "leads": 260,
+      "phoneConsults": 126,
+      "phoneConsultShows": 69,
+      "phoneConsultNoShows": 57,
+      "exams": 37,
+      "commits": 22,
+      "selfScheduled": 106,
+      "adSpend": 8314.8
+    },
+    {
+      "month": "2025-07",
+      "leads": 142,
+      "phoneConsults": 92,
+      "phoneConsultShows": 63,
+      "phoneConsultNoShows": 29,
+      "exams": 29,
+      "commits": 13,
+      "selfScheduled": 78,
+      "adSpend": 5884.64
+    },
+    {
+      "month": "2025-08",
+      "leads": 114,
+      "phoneConsults": 60,
+      "phoneConsultShows": 44,
+      "phoneConsultNoShows": 16,
+      "exams": 23,
+      "commits": 8,
+      "selfScheduled": 45,
+      "adSpend": 5659.85
+    },
+    {
+      "month": "2025-09",
+      "leads": 125,
+      "phoneConsults": 62,
+      "phoneConsultShows": 42,
+      "phoneConsultNoShows": 20,
+      "exams": 22,
+      "commits": 10,
+      "selfScheduled": 50,
+      "adSpend": 5979.62
+    },
+    {
+      "month": "2025-10",
+      "leads": 135,
+      "phoneConsults": 79,
+      "phoneConsultShows": 54,
+      "phoneConsultNoShows": 25,
+      "exams": 25,
+      "commits": 12,
+      "selfScheduled": 52,
+      "adSpend": 6428.3
+    },
+    {
+      "month": "2025-11",
+      "leads": 118,
+      "phoneConsults": 51,
+      "phoneConsultShows": 32,
+      "phoneConsultNoShows": 19,
+      "exams": 14,
+      "commits": 4,
+      "selfScheduled": 44,
+      "adSpend": 5861.77
+    },
+    {
+      "month": "2025-12",
+      "leads": 111,
+      "phoneConsults": 50,
+      "phoneConsultShows": 34,
+      "phoneConsultNoShows": 16,
+      "exams": 15,
+      "commits": 9,
+      "selfScheduled": 27,
+      "adSpend": 6787.42
+    },
+    {
+      "month": "2026-01",
+      "leads": 117,
+      "phoneConsults": 41,
+      "phoneConsultShows": 27,
+      "phoneConsultNoShows": 14,
+      "exams": 8,
+      "commits": 5,
+      "selfScheduled": 23,
+      "adSpend": 5863.78
+    },
+    {
+      "month": "2026-02",
+      "leads": 123,
+      "phoneConsults": 49,
+      "phoneConsultShows": 35,
+      "phoneConsultNoShows": 14,
+      "exams": 16,
+      "commits": 4,
+      "selfScheduled": 31,
+      "adSpend": 6102.41
+    },
+    {
+      "month": "2026-03",
+      "leads": 17,
+      "phoneConsults": 4,
+      "phoneConsultShows": 3,
+      "phoneConsultNoShows": 1,
+      "exams": 0,
+      "commits": 0,
+      "selfScheduled": 2,
+      "adSpend": 1149.66
+    }
+  ]
+}

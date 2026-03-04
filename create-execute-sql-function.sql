@@ -1,0 +1,7 @@
+-- Create a function to execute arbitrary SQL
+CREATE OR REPLACE FUNCTION execute_sql(sql TEXT)
+RETURNS VOID AS $$
+BEGIN
+    EXECUTE sql;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
