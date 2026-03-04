@@ -121,6 +121,7 @@
                 const adSpend = m.adSpend || 0;
                 const roasMultiplier = adSpend > 0 ? (totalRevenue / adSpend).toFixed(2) : '0.00';
                 const roasDollar = totalRevenue - adSpend;
+                const costPerLead = m.leads > 0 && adSpend > 0 ? (adSpend / m.leads).toFixed(2) : '0.00';
                 
                 return `
                     <div class="card" style="margin-bottom: 20px;">
@@ -172,6 +173,17 @@
                                 <div style="background: #0a0e27; padding: 12px; border-radius: 8px;">
                                     <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">${commitRate}%</div>
                                     <div style="font-size: 0.75rem; color: #94a3b8;">Commit Rate</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cost Per Lead -->
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase;">Cost Per Lead</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                                <div style="background: #0a0e27; padding: 12px; border-radius: 8px; border: 2px solid #06b6d4;">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #06b6d4;">$${costPerLead}</div>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">Cost Per Lead</div>
                                 </div>
                             </div>
                         </div>
