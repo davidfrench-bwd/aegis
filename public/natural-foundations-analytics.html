@@ -237,8 +237,7 @@
             const hasAccess = profile.role === 'admin' || (profile.clinic_access && profile.clinic_access.includes('natural-foundations'));
             
             if (!hasAccess) {
-                alert('You do not have access to this dashboard');
-                window.location.href = '/';
+                window.location.href = '/login.html';
                 return;
             }
             const nav = document.querySelector('.main-nav');
