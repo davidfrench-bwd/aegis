@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1772665266052,
+  "lastUpdated": 1772686891352,
   "healthScore": 100,
   "jobs": [
     {
@@ -7,8 +7,8 @@
       "name": "Heartbeat Checks",
       "enabled": true,
       "schedule": "Every 1 hour",
-      "nextRun": 1772668866052,
-      "lastRun": 1772663466052,
+      "nextRun": 1772690491352,
+      "lastRun": 1772685091352,
       "status": "active",
       "description": "Periodic check-ins: reviews HEARTBEAT.md, monitors emails/calendar, performs proactive maintenance, posts daily briefings at 8 AM",
       "source": "OpenClaw Agent",
@@ -19,8 +19,8 @@
       "name": "dashboard-cache-update-6h",
       "enabled": true,
       "schedule": "0 */6 * * *",
-      "nextRun": 1772665241900,
-      "lastRun": 1772643641908,
+      "nextRun": 1772686841900,
+      "lastRun": 1772665241905,
       "status": "active",
       "description": "Updates dashboard cache with latest cron job status and pushes to GitHub/Vercel (runs every 6 hours)",
       "source": "OpenClaw Cron",
@@ -62,6 +62,17 @@
       "type": "Unknown"
     },
     {
+      "id": "25f9c17f-2895-45d8-a16d-adf384ad9fb5",
+      "name": "thrive-restoration-ghl-refresh",
+      "enabled": true,
+      "schedule": "32 7 * * *",
+      "nextRun": 1772713920000,
+      "status": "active",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
       "id": "bbe5cc80-63dc-4ebd-a2a8-278dc39d671b",
       "name": "daily-briefing",
       "enabled": true,
@@ -77,7 +88,7 @@
   "upcoming": [
     {
       "name": "dashboard-cache-update-6h",
-      "time": 1772665241900
+      "time": 1772686841900
     },
     {
       "name": "Nightly Memory Consolidation",
@@ -90,6 +101,10 @@
     {
       "name": "natural-foundations-ghl-refresh",
       "time": 1772713860000
+    },
+    {
+      "name": "thrive-restoration-ghl-refresh",
+      "time": 1772713920000
     },
     {
       "name": "daily-briefing",
