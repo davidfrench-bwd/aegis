@@ -224,17 +224,23 @@
 
         // Initialize with auth check
         (async () => {
-            // Check if user has access to thrive restoration clinic
-            const hasAccess = await canAccessClinic('thrive-restoration');
-            if (!hasAccess) {
-                alert('You do not have access to this dashboard');
+            // Check if user is logged in first
+            const user = await getCurrentUser();
+            if (!user) {
+                // Not logged in - redirect to login without alert
                 window.location.href = '/login.html';
                 return;
             }
             
-            // Get user profile to check if admin
-            const user = await getCurrentUser();
+            // Check if user has access to thrive restoration clinic
             const profile = await getUserProfile(user.id);
+            const hasAccess = profile.role === 'admin' || (profile.clinic_access && profile.clinic_access.includes('thrive-restoration'));
+            
+            if (!hasAccess) {
+                alert('You do not have access to this dashboard');
+                window.location.href = '/';
+                return;
+            }
             const nav = document.querySelector('.main-nav');
             
             // Add admin-only navigation links
