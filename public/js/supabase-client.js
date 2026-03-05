@@ -50,8 +50,7 @@ async function requireAuth(requiredRole = null) {
         const profile = await getUserProfile(user.id);
         
         if (profile.role !== requiredRole && profile.role !== 'admin') {
-            alert('You do not have permission to access this page.');
-            window.location.href = '/';
+            window.location.href = '/login.html';
             return null;
         }
         
