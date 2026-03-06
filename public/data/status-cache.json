@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1772751674208,
+  "lastUpdated": 1772773272853,
   "healthScore": 100,
   "jobs": [
     {
@@ -7,8 +7,8 @@
       "name": "Heartbeat Checks",
       "enabled": true,
       "schedule": "Every 1 hour",
-      "nextRun": 1772755274208,
-      "lastRun": 1772749874208,
+      "nextRun": 1772776872853,
+      "lastRun": 1772771472853,
       "status": "active",
       "description": "Periodic check-ins: reviews HEARTBEAT.md, monitors emails/calendar, performs proactive maintenance, posts daily briefings at 8 AM",
       "source": "OpenClaw Agent",
@@ -19,8 +19,8 @@
       "name": "dashboard-cache-update-6h",
       "enabled": true,
       "schedule": "0 */6 * * *",
-      "nextRun": 1772751641900,
-      "lastRun": 1772730041906,
+      "nextRun": 1772773241900,
+      "lastRun": 1772751641908,
       "status": "active",
       "description": "Updates dashboard cache with latest cron job status and pushes to GitHub/Vercel (runs every 6 hours)",
       "source": "OpenClaw Cron",
@@ -90,7 +90,7 @@
   "upcoming": [
     {
       "name": "dashboard-cache-update-6h",
-      "time": 1772751641900
+      "time": 1772773241900
     },
     {
       "name": "Nightly Memory Consolidation",
