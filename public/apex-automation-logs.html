@@ -340,7 +340,13 @@
             statsSummary.style.display = 'none';
 
             try {
-                const response = await fetch(`http://localhost:3456/api/automation-rules/logs/${date}`);
+                // Try static file first (for hosted dashboard)
+                let response = await fetch(`/data/automation-logs/${date}.jsonl`);
+                
+                // If not found, try API server (for local development)
+                if (!response.ok) {
+                    response = await fetch(`http://localhost:3456/api/automation-rules/logs/${date}`);
+                }
                 
                 if (!response.ok) {
                     if (response.status === 404) {
@@ -359,7 +365,18 @@
                     throw new Error(`HTTP ${response.status}`);
                 }
 
-                const logs = await response.json();
+                // Handle both JSON array (API) and JSONL (static file)
+                let logs;
+                const contentType = response.headers.get('content-type');
+                const text = await response.text();
+                
+                if (contentType && contentType.includes('application/json')) {
+                    // JSON array from API
+                    logs = JSON.parse(text);
+                } else {
+                    // JSONL from static file
+                    logs = text.trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
+                }
                 
                 loadingState.style.display = 'none';
 
