@@ -271,6 +271,8 @@
             font-style: italic;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -451,22 +453,48 @@
     </div>
 
     <script>
-        // Load rule config from file
+        // Load rule config from Supabase
         async function loadRuleConfig() {
             try {
-                // Try API first
-                const response = await fetch('http://localhost:3456/api/automation-rules/apex');
-                if (response.ok) {
-                    const config = await response.json();
-                    populateRuleForm(config);
-                    return;
-                }
+                // Get the rule from Supabase
+                const { data: rules, error } = await supabase
+                    .from('automation_rules')
+                    .select('*')
+                    .eq('clinic_id', 'apex')
+                    .eq('rule_id', 'quiz-lead-boost')
+                    .single();
+                
+                if (error) throw error;
+                
+                // Transform from database format to UI format
+                const config = {
+                    rules: [{
+                        id: rules.rule_id,
+                        name: rules.rule_name,
+                        enabled: rules.enabled,
+                        trigger: {
+                            type: rules.trigger_type,
+                            threshold: rules.trigger_threshold,
+                            window: rules.trigger_window,
+                            scope: rules.trigger_scope
+                        },
+                        action: {
+                            type: rules.action_type,
+                            percentage: rules.action_percentage,
+                            maxDailyBudget: rules.max_daily_budget,
+                            campaignNameFilter: rules.campaign_name_filter,
+                            adSetStatusFilter: rules.ad_set_status_filter,
+                            frequency: rules.action_frequency
+                        }
+                    }]
+                };
+                
+                populateRuleForm(config);
             } catch (error) {
-                console.log('API not running, using default values');
+                console.error('Failed to load from Supabase:', error);
+                alert('Failed to load configuration from database. Using defaults.');
+                loadDefaultConfig();
             }
-            
-            // Fallback: Load default config
-            loadDefaultConfig();
         }
 
         function loadDefaultConfig() {
@@ -512,76 +540,50 @@
         }
 
         async function saveRule() {
-            const rule = {
-                id: 'quiz-lead-boost',
-                name: 'Quiz Lead Boost - Per Ad Set',
-                enabled: document.getElementById('toggle-quiz-lead-boost').checked,
-                trigger: {
-                    type: document.getElementById('trigger-type').value,
-                    threshold: parseInt(document.getElementById('trigger-threshold').value),
-                    window: document.getElementById('trigger-window').value,
-                    scope: document.getElementById('trigger-scope').value
-                },
-                action: {
-                    type: document.getElementById('action-type').value,
-                    percentage: parseInt(document.getElementById('action-percentage').value),
-                    maxDailyBudget: parseInt(document.getElementById('action-max-budget').value) * 100,
-                    campaignNameFilter: document.getElementById('filter-campaign').value,
-                    adSetStatusFilter: document.getElementById('filter-status').value,
-                    frequency: document.getElementById('action-frequency').value
-                }
-            };
+            const enabled = document.getElementById('toggle-quiz-lead-boost').checked;
+            const triggerType = document.getElementById('trigger-type').value;
+            const triggerThreshold = parseInt(document.getElementById('trigger-threshold').value);
+            const triggerWindow = document.getElementById('trigger-window').value;
+            const triggerScope = document.getElementById('trigger-scope').value;
+            const actionType = document.getElementById('action-type').value;
+            const actionPercentage = parseInt(document.getElementById('action-percentage').value);
+            const maxDailyBudget = parseInt(document.getElementById('action-max-budget').value) * 100;
+            const campaignNameFilter = document.getElementById('filter-campaign').value;
+            const adSetStatusFilter = document.getElementById('filter-status').value;
+            const actionFrequency = document.getElementById('action-frequency').value;
 
             try {
-                const response = await fetch('http://localhost:3456/api/automation-rules/apex', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rules: [rule] })
-                });
+                // Update in Supabase
+                const { data, error } = await supabase
+                    .from('automation_rules')
+                    .update({
+                        enabled: enabled,
+                        trigger_type: triggerType,
+                        trigger_threshold: triggerThreshold,
+                        trigger_window: triggerWindow,
+                        trigger_scope: triggerScope,
+                        action_type: actionType,
+                        action_percentage: actionPercentage,
+                        max_daily_budget: maxDailyBudget,
+                        campaign_name_filter: campaignNameFilter,
+                        ad_set_status_filter: adSetStatusFilter,
+                        action_frequency: actionFrequency
+                    })
+                    .eq('clinic_id', 'apex')
+                    .eq('rule_id', 'quiz-lead-boost')
+                    .select();
 
-                if (response.ok) {
-                    alert('✅ Rule saved successfully!\n\nConfig updated at:\n~/.openclaw/workspace/skills/npe-ad-automation/config/apex-pain-solutions.json');
-                } else {
-                    alert('❌ Failed to save rule');
-                }
+                if (error) throw error;
+
+                alert('✅ Rule saved successfully!\n\nChanges will take effect on the next automation run (every 2 hours).');
             } catch (error) {
                 console.error('Save error:', error);
-                alert('💡 To save changes:\n\n1. Open Terminal\n2. Run: bash ~/.openclaw/workspace/skills/npe-ad-automation/edit-config.sh\n3. Edit the values you want\n4. Save and exit\n\nChanges take effect on next automation run (every 2 hours).\n\nThe dashboard is read-only for now.');
+                alert('❌ Failed to save rule:\n\n' + error.message);
             }
         }
 
         async function testRule() {
-            alert('🧪 Running dry run test...\n\nCheck console for results.');
-            
-            try {
-                const response = await fetch('http://localhost:3456/api/automation-rules/test?clinic=apex&dry-run=true');
-                const result = await response.json();
-                
-                console.log('Dry run results:', result);
-                
-                if (result.success) {
-                    let message = `✅ Dry Run Complete!\n\n`;
-                    message += `Ad Sets Checked: ${result.adSetsChecked}\n`;
-                    message += `Triggered: ${result.triggered}\n`;
-                    message += `Budget Changes: ${result.budgetChanges}\n`;
-                    
-                    if (result.budgetChangeDetails && result.budgetChangeDetails.length > 0) {
-                        message += `\nChanges:\n`;
-                        result.budgetChangeDetails.forEach(change => {
-                            message += `${change}\n`;
-                        });
-                    }
-                    
-                    message += `\nSee console for full output.`;
-                    alert(message);
-                } else {
-                    alert(`❌ Test failed:\n\n${result.error}\n\nCheck console for details.`);
-                    console.error('Test error details:', result);
-                }
-            } catch (error) {
-                console.error('Test error:', error);
-                alert('⚠️ API server not running.\n\nTo test:\n1. Run: npm run api\n2. Or run manually:\nnpx tsx skills/npe-ad-automation/run-automation.ts --dry-run');
-            }
+            alert('🧪 Test feature coming soon!\n\nFor now, you can test via terminal:\n\ncd ~/.openclaw/workspace\nnpx tsx skills/npe-ad-automation/run-automation-supabase.ts --dry-run\n\nResults will appear in the Logs page.');
         }
 
         function viewLogs() {

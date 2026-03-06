@@ -249,6 +249,8 @@
             margin-bottom: 16px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -340,46 +342,35 @@
             statsSummary.style.display = 'none';
 
             try {
-                // Try static file first (for hosted dashboard)
-                let response = await fetch(`/data/automation-logs/${date}.jsonl`);
+                // Query Supabase for logs on this date
+                const startOfDay = `${date}T00:00:00`;
+                const endOfDay = `${date}T23:59:59`;
                 
-                // If not found, try API server (for local development)
-                if (!response.ok) {
-                    response = await fetch(`http://localhost:3456/api/automation-rules/logs/${date}`);
+                const { data: logs, error } = await supabase
+                    .from('automation_logs')
+                    .select('*')
+                    .gte('timestamp', startOfDay)
+                    .lte('timestamp', endOfDay)
+                    .eq('clinic_id', 'apex-pain-solutions')
+                    .order('timestamp', { ascending: false });
+                
+                if (error) {
+                    throw new Error(error.message);
                 }
                 
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        loadingState.style.display = 'none';
-                        logsList.innerHTML = `
-                            <div class="no-logs">
-                                <div class="no-logs-icon">📭</div>
-                                <div>No automation logs found for ${date}</div>
-                                <div style="margin-top: 8px; font-size: 0.875rem;">
-                                    Try selecting a different date or run the automation.
-                                </div>
+                if (!logs || logs.length === 0) {
+                    loadingState.style.display = 'none';
+                    logsList.innerHTML = `
+                        <div class="no-logs">
+                            <div class="no-logs-icon">📭</div>
+                            <div>No automation logs found for ${date}</div>
+                            <div style="margin-top: 8px; font-size: 0.875rem;">
+                                Try selecting a different date or run the automation.
                             </div>
-                        `;
-                        return;
-                    }
-                    throw new Error(`HTTP ${response.status}`);
+                        </div>
+                    `;
+                    return;
                 }
-
-                // Handle both JSON array (API) and JSONL (static file)
-                let logs;
-                const contentType = response.headers.get('content-type');
-                const text = await response.text();
-                
-                if (contentType && contentType.includes('application/json')) {
-                    // JSON array from API
-                    logs = JSON.parse(text);
-                } else {
-                    // JSONL from static file
-                    logs = text.trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
-                }
-                
-                // Sort by timestamp - most recent first
-                logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
                 
                 loadingState.style.display = 'none';
 
