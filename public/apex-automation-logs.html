@@ -378,6 +378,9 @@
                     logs = text.trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
                 }
                 
+                // Sort by timestamp - most recent first
+                logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+                
                 loadingState.style.display = 'none';
 
                 if (!logs || logs.length === 0) {
