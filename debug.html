@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dashboard</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+        .log { margin: 5px 0; }
+        .error { color: #f00; }
+        .success { color: #0f0; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Debug Console</h1>
+    <div id="logs"></div>
+    
+    <script>
+        const logs = document.getElementById('logs');
+        
+        function log(msg, isError = false) {
+            const div = document.createElement('div');
+            div.className = 'log ' + (isError ? 'error' : 'success');
+            div.textContent = new Date().toISOString() + ' - ' + msg;
+            logs.appendChild(div);
+            console.log(msg);
+        }
+        
+        log('Starting debug...');
+        
+        // Test 1: Can we fetch the data?
+        log('Test 1: Fetching data from /data/status-cache.json...');
+        fetch('/data/status-cache.json?t=' + Date.now())
+            .then(response => {
+                log('✓ Fetch response received, status: ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                log('✓ Data parsed successfully');
+                log('  - Health Score: ' + data.healthScore);
+                log('  - Total Jobs: ' + data.jobs.length);
+                log('  - Last Updated: ' + new Date(data.lastUpdated).toLocaleString());
+                
+                // Test 2: Check if DOM elements exist
+                log('Test 2: Checking if DOM elements exist...');
+                const elements = ['healthScore', 'totalJobs', 'activeJobs', 'successRate', 'upcoming', 'jobs'];
+                elements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        log('  ✓ Element #' + id + ' exists');
+                    } else {
+                        log('  ✗ Element #' + id + ' NOT FOUND', true);
+                    }
+                });
+                
+                // Test 3: Try to render data
+                log('Test 3: Sample job data:');
+                data.jobs.forEach((job, i) => {
+                    log('  Job ' + (i+1) + ': ' + job.name + ' (enabled: ' + job.enabled + ')');
+                });
+                
+            })
+            .catch(err => {
+                log('✗ ERROR: ' + err.message, true);
+                log('✗ Stack: ' + err.stack, true);
+            });
+    </script>
+</body>
+</html>

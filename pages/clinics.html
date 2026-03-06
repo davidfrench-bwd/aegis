@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏥 Clinic Management - Aegis</title>
+    <link rel="stylesheet" href="/dashboard/style.css">
+    <link rel="stylesheet" href="/dashboard/pages/clinics.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Clinic Management</h1>
+            <p class="subtitle">Configure clinic settings, tone, offers, and automation</p>
+            <nav class="breadcrumb">
+                <a href="/dashboard/">← Back to Dashboard</a>
+            </nav>
+        </header>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Active Clinics</h2>
+                <button id="addClinicBtn" class="btn btn-primary">➕ Add Clinic</button>
+            </div>
+            <div id="clinics" class="clinics-list">
+                <div class="loading">Loading clinics...</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Quick Actions</h2>
+            <div class="quick-actions">
+                <a href="https://docs.google.com/spreadsheets/d/1j--lw6xUxB2ZpIpomZXFl4yA8vtMciTQDhXu7A5dAqE" target="_blank" class="btn btn-secondary">
+                    📄 Open Google Sheet (Legacy)
+                </a>
+                <button id="exportCSVBtn" class="btn btn-secondary">
+                    💾 Export to CSV
+                </button>
+                <button id="syncSheetBtn" class="btn btn-secondary">
+                    🔄 Sync from Google Sheet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/dashboard/pages/clinics.js"></script>
+</body>
+</html>

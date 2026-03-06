@@ -1,0 +1,123 @@
+{
+  "lastUpdated": 1772794853049,
+  "healthScore": 100,
+  "jobs": [
+    {
+      "id": "heartbeat",
+      "name": "Heartbeat Checks",
+      "enabled": true,
+      "schedule": "Every 1 hour",
+      "nextRun": 1772798453049,
+      "lastRun": 1772793053049,
+      "status": "active",
+      "description": "Periodic check-ins: reviews HEARTBEAT.md, monitors emails/calendar, performs proactive maintenance, posts daily briefings at 8 AM",
+      "source": "OpenClaw Agent",
+      "type": "Monitoring"
+    },
+    {
+      "id": "c3fe8040-f58e-4388-92dc-b2336a0c6178",
+      "name": "dashboard-cache-update-6h",
+      "enabled": true,
+      "schedule": "0 */6 * * *",
+      "nextRun": 1772794841900,
+      "lastRun": 1772773241908,
+      "status": "active",
+      "description": "Updates dashboard cache with latest cron job status and pushes to GitHub/Vercel (runs every 6 hours)",
+      "source": "OpenClaw Cron",
+      "type": "System Maintenance"
+    },
+    {
+      "id": "88a940e9-0d14-4242-ab79-44f1bd50d177",
+      "name": "apex-ghl-refresh",
+      "enabled": true,
+      "schedule": "30 7 * * *",
+      "nextRun": 1772800200000,
+      "lastRun": 1772713800008,
+      "status": "active",
+      "description": "Fetches GoHighLevel contacts, opportunities, and pipeline data for Apex Pain Solutions clinic dashboard",
+      "source": "OpenClaw Cron",
+      "type": "Data Sync"
+    },
+    {
+      "id": "0e685e05-cf65-4596-9d74-cdc8b240afb3",
+      "name": "natural-foundations-ghl-refresh",
+      "enabled": true,
+      "schedule": "31 7 * * *",
+      "nextRun": 1772800260000,
+      "lastRun": 1772713901147,
+      "status": "active",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
+      "id": "25f9c17f-2895-45d8-a16d-adf384ad9fb5",
+      "name": "thrive-restoration-ghl-refresh",
+      "enabled": true,
+      "schedule": "32 7 * * *",
+      "nextRun": 1772800320000,
+      "lastRun": 1772713936896,
+      "status": "active",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
+      "id": "bbe5cc80-63dc-4ebd-a2a8-278dc39d671b",
+      "name": "daily-briefing",
+      "enabled": true,
+      "schedule": "0 8 * * *",
+      "nextRun": 1772802000000,
+      "lastRun": 1772715600009,
+      "status": "active",
+      "description": "Posts automated daily update summary to Discord #📅-daily-update channel at 8 AM",
+      "source": "OpenClaw Cron",
+      "type": "Reporting"
+    },
+    {
+      "id": "a4330a8c-a8a2-4db3-9b18-ccf71b8b204a",
+      "name": "Nightly Memory Consolidation",
+      "enabled": true,
+      "schedule": "0 2 * * *",
+      "nextRun": 1772866800000,
+      "lastRun": 1772780400007,
+      "status": "active",
+      "description": "Reviews daily sessions, updates knowledge graph, consolidates tacit knowledge into memory files",
+      "source": "OpenClaw Cron",
+      "type": "System Maintenance"
+    }
+  ],
+  "upcoming": [
+    {
+      "name": "dashboard-cache-update-6h",
+      "time": 1772794841900
+    },
+    {
+      "name": "apex-ghl-refresh",
+      "time": 1772800200000
+    },
+    {
+      "name": "natural-foundations-ghl-refresh",
+      "time": 1772800260000
+    },
+    {
+      "name": "thrive-restoration-ghl-refresh",
+      "time": 1772800320000
+    },
+    {
+      "name": "daily-briefing",
+      "time": 1772802000000
+    },
+    {
+      "name": "Nightly Memory Consolidation",
+      "time": 1772866800000
+    }
+  ],
+  "stats": {
+    "totalRuns": 28,
+    "successful": 27,
+    "failed": 1,
+    "successRate": 96,
+    "avgRuntime": "42s"
+  }
+}

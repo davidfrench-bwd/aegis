@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPE Analytics — Aegis Dashboard</title>
+    <link rel="stylesheet" href="/dashboard/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-client.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 NPE ANALYTICS</h1>
+            <p class="subtitle">Clinic Performance Dashboard</p>
+            <nav class="main-nav">
+                <a href="/" class="nav-link">← Back to Aegis</a>
+                <a href="/npe.html" class="nav-link">🏥 NPE Overview</a>
+            </nav>
+            <div class="last-update">
+                <span id="lastUpdate">Loading...</span>
+            </div>
+        </header>
+
+        <div id="analytics-container">
+            <div class="card">
+                <h2>Loading analytics data...</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-refresh analytics cache on page load
+        async function refreshAnalyticsOnLoad() {
+            try {
+                fetch('https://alfreds-mac-mini.tail1f72dd.ts.net/refresh-analytics', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trigger: 'page-load' })
+                }).catch(() => console.log('Analytics refresh triggered'));
+            } catch (error) {
+                console.log('Could not trigger analytics refresh');
+            }
+        }
+
+        async function loadAnalytics() {
+            const locationId = 'JIISRrxbmMANItOyBU7E'; // Advanced Shockwave
+            
+            try {
+                const response = await fetch(`https://alfreds-mac-mini.tail1f72dd.ts.net:3001/api/analytics/${locationId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                displayAnalytics(data);
+                document.getElementById('lastUpdate').textContent = 
+                    `Last updated: ${new Date(data.cacheInfo.lastUpdated).toLocaleString()}`;
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                document.getElementById('analytics-container').innerHTML = `
+                    <div class="card">
+                        <h2>❌ Error Loading Data</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayAnalytics(data) {
+            const container = document.getElementById('analytics-container');
+            const currentMonth = data.allMonthlyMetrics[data.allMonthlyMetrics.length - 1];
+            
+            container.innerHTML = `
+                <div class="card">
+                    <h2>${currentMonth.month} — Current Month</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${currentMonth.leads}</div>
+                            <div class="stat-label">Leads</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${currentMonth.phoneConsults}</div>
+                            <div class="stat-label">Consults Booked</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${currentMonth.phoneConsultShows}</div>
+                            <div class="stat-label">Consult Shows</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${currentMonth.exams}</div>
+                            <div class="stat-label">Exams</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${currentMonth.commitsCount}</div>
+                            <div class="stat-label">Commits</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">$${currentMonth.adSpend.toLocaleString()}</div>
+                            <div class="stat-label">Ad Spend</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${currentMonth.leadToConsultRate.toFixed(1)}%</div>
+                            <div class="stat-label">Lead → Consult</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${currentMonth.overallConversion.toFixed(1)}%</div>
+                            <div class="stat-label">Overall Conversion</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📈 Recent Trends (Last 3 Months)</h2>
+                    <div id="trends-table"></div>
+                </div>
+            `;
+
+            // Add trends table
+            const recentMonths = data.allMonthlyMetrics.slice(-3);
+            const trendsHtml = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <th style="padding: 10px; text-align: left;">Month</th>
+                            <th style="padding: 10px; text-align: right;">Leads</th>
+                            <th style="padding: 10px; text-align: right;">Consults</th>
+                            <th style="padding: 10px; text-align: right;">Exams</th>
+                            <th style="padding: 10px; text-align: right;">Commits</th>
+                            <th style="padding: 10px; text-align: right;">Ad Spend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentMonths.map(m => `
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 10px;">${m.month}</td>
+                                <td style="padding: 10px; text-align: right;">${m.leads}</td>
+                                <td style="padding: 10px; text-align: right;">${m.phoneConsults}</td>
+                                <td style="padding: 10px; text-align: right;">${m.exams}</td>
+                                <td style="padding: 10px; text-align: right;">${m.commitsCount}</td>
+                                <td style="padding: 10px; text-align: right;">$${m.adSpend.toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('trends-table').innerHTML = trendsHtml;
+        }
+
+        // Initialize
+        refreshAnalyticsOnLoad();
+        loadAnalytics();
+        
+        // Reload data every 30 seconds
+        setInterval(loadAnalytics, 30000);
+    </script>
+    <script>
+        // Require admin authentication
+        (async () => {
+            const auth = await requireAuth("admin");
+            if (!auth) return;
+            
+            // Add logout button
+            const nav = document.querySelector(".main-nav");
+            if (nav) {
+                const logoutBtn = document.createElement("a");
+                logoutBtn.textContent = "🚪 Logout";
+                logoutBtn.className = "nav-link";
+                logoutBtn.style.background = "#ef4444";
+                logoutBtn.style.cursor = "pointer";
+                logoutBtn.onclick = async (e) => {
+                    e.preventDefault();
+                    await signOut();
+                    window.location.href = "/login.html";
+                };
+                nav.appendChild(logoutBtn);
+            }
+        })();
+    </script>
+</body>
+</html>

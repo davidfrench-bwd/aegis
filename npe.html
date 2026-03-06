@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuropathy Profit Engine — Command Center</title>
+    <link rel="stylesheet" href="/dashboard/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/js/supabase-client.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 NEUROPATHY PROFIT ENGINE</h1>
+            <p class="subtitle">More Cash. Fewer Clients. Less Work.</p>
+            <nav class="main-nav">
+                <a href="/" class="nav-link">← Back to Aegis</a>
+                <a href="/npe-kanban.html" class="nav-link">📋 Task Board</a>
+                <a href="/clinic-cards.html" class="nav-link">🏥 Clinic Directory</a>
+            </nav>
+        </header>
+
+        <div style="background: #1a1f3a; border: 1px solid #334155; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
+            <h2 style="color: #00d9ff; margin-bottom: 20px;">📊 Business Overview</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div style="background: #0a0e27; padding: 20px; border-radius: 8px;">
+                    <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 8px;">Active Clinics</div>
+                    <div style="font-size: 2rem; font-weight: 700;">2</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Advanced Shockwave, Apex Pain</div>
+                </div>
+                <div style="background: #0a0e27; padding: 20px; border-radius: 8px;">
+                    <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 8px;">SMS Agent Status</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #94a3b8;">STANDBY</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Ready to activate</div>
+                </div>
+                <div style="background: #0a0e27; padding: 20px; border-radius: 8px;">
+                    <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 8px;">Automation Level</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #00d9ff;">Ready</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Systems built, standby mode</div>
+                </div>
+                <div style="background: #0a0e27; padding: 20px; border-radius: 8px;">
+                    <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 8px;">Strategy</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: #a855f7;">SCALE</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Systems that work without you</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #1a1f3a; border: 1px solid #334155; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
+            <h2 style="color: #00d9ff; margin-bottom: 20px;">🤖 Active Automations</h2>
+            
+            <div style="display: grid; gap: 15px;">
+                <div style="background: #0a0e27; padding: 20px; border-radius: 8px; border-left: 4px solid #94a3b8;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: #94a3b8; margin: 0;">SMS Appointment Setter</h3>
+                        <span style="background: #334155; color: #94a3b8; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">STANDBY</span>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 8px;">
+                        AI agent built and tested, ready to activate when needed
+                    </p>
+                    <div style="font-size: 0.75rem; color: #64748b;">
+                        <strong>Locations:</strong> Advanced Shockwave Pain Relief, Apex Pain Solutions<br>
+                        <strong>Status:</strong> Agent ready, polling disabled<br>
+                        <strong>Activation:</strong> Available on-demand
+                    </div>
+                </div>
+
+                <div style="background: #0a0e27; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: #10b981; margin: 0;">Clinic Context Sync</h3>
+                        <span style="background: #10b981; color: #0a0e27; padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">LIVE</span>
+                    </div>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 8px;">
+                        Google Sheets as source of truth for clinic configurations (replaces Notion)
+                    </p>
+                    <div style="font-size: 0.75rem; color: #64748b;">
+                        <strong>Source:</strong> Google Sheets "NPE - Clinic Context"<br>
+                        <strong>Access:</strong> Read-only API integration<br>
+                        <strong>Speed:</strong> <200ms (vs 5-10s for Notion)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #1a1f3a; border: 1px solid #334155; border-radius: 12px; padding: 30px; margin-bottom: 20px;">
+            <h2 style="color: #00d9ff; margin-bottom: 20px;">🎯 Strategic Goals</h2>
+            
+            <div style="display: grid; gap: 15px;">
+                <div style="background: #0a0e27; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #a855f7; margin-bottom: 8px;">More Cash</h4>
+                    <p style="font-size: 0.875rem; color: #94a3b8;">Increase revenue per clinic through automation and optimization</p>
+                </div>
+                <div style="background: #0a0e27; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #a855f7; margin-bottom: 8px;">Fewer Clients</h4>
+                    <p style="font-size: 0.875rem; color: #94a3b8;">Focus on 2-3 high-quality clinics, not dozens of low-margin accounts</p>
+                </div>
+                <div style="background: #0a0e27; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #a855f7; margin-bottom: 8px;">Less Work</h4>
+                    <p style="font-size: 0.875rem; color: #94a3b8;">Build systems that run without constant intervention (AI agents, automation)</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #1a1f3a; border: 1px solid #334155; border-radius: 12px; padding: 30px;">
+            <h2 style="color: #00d9ff; margin-bottom: 20px;">📋 Quick Actions</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <a href="/clinic-cards.html" style="background: #0a0e27; padding: 20px; border-radius: 8px; border: 1px solid #334155; text-decoration: none; transition: all 0.2s; display: block;">
+                    <h4 style="color: #00d9ff; margin-bottom: 8px;">🏥 Clinic Directory</h4>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin: 0;">Browse all 19 active clients with contact info and links</p>
+                </a>
+                
+                <a href="https://docs.google.com/spreadsheets/d/1j--lw6xUxB2ZpIpomZXFl4yA8vtMciTQDhXu7A5dAqE" target="_blank" style="background: #0a0e27; padding: 20px; border-radius: 8px; border: 1px solid #334155; text-decoration: none; transition: all 0.2s; display: block;">
+                    <h4 style="color: #00d9ff; margin-bottom: 8px;">📊 NPE Clinic Context</h4>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin: 0;">Edit clinic tone, offers, and notes (source of truth)</p>
+                </a>
+                
+                <a href="https://coachcopilot.io" target="_blank" style="background: #0a0e27; padding: 20px; border-radius: 8px; border: 1px solid #334155; text-decoration: none; transition: all 0.2s; display: block;">
+                    <h4 style="color: #00d9ff; margin-bottom: 8px;">💬 GoHighLevel</h4>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin: 0;">View SMS conversations and appointments</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update last SMS check timestamp
+        function updateLastCheck() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('last-sms-check').textContent = timeStr;
+        }
+
+        updateLastCheck();
+        setInterval(updateLastCheck, 60000); // Update every minute
+    </script>
+    <script>
+        // Require admin authentication
+        (async () => {
+            const auth = await requireAuth("admin");
+            if (!auth) return;
+            
+            // Add logout button
+            const nav = document.querySelector(".main-nav");
+            if (nav) {
+                const logoutBtn = document.createElement("a");
+                logoutBtn.textContent = "🚪 Logout";
+                logoutBtn.className = "nav-link";
+                logoutBtn.style.background = "#ef4444";
+                logoutBtn.style.cursor = "pointer";
+                logoutBtn.onclick = async (e) => {
+                    e.preventDefault();
+                    await signOut();
+                    window.location.href = "/login.html";
+                };
+                nav.appendChild(logoutBtn);
+            }
+        })();
+    </script>
+</body>
+</html>
