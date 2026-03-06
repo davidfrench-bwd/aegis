@@ -560,9 +560,23 @@
                 console.log('Dry run results:', result);
                 
                 if (result.success) {
-                    alert(`✅ Dry Run Complete!\n\nAd Sets Checked: ${result.adSetsChecked}\nTriggered: ${result.triggered}\nBudget Changes: ${result.budgetChanges}\n\nSee console for full output.`);
+                    let message = `✅ Dry Run Complete!\n\n`;
+                    message += `Ad Sets Checked: ${result.adSetsChecked}\n`;
+                    message += `Triggered: ${result.triggered}\n`;
+                    message += `Budget Changes: ${result.budgetChanges}\n`;
+                    
+                    if (result.budgetChangeDetails && result.budgetChangeDetails.length > 0) {
+                        message += `\nChanges:\n`;
+                        result.budgetChangeDetails.forEach(change => {
+                            message += `${change}\n`;
+                        });
+                    }
+                    
+                    message += `\nSee console for full output.`;
+                    alert(message);
                 } else {
-                    alert(`❌ Test failed:\n\n${result.error}`);
+                    alert(`❌ Test failed:\n\n${result.error}\n\nCheck console for details.`);
+                    console.error('Test error details:', result);
                 }
             } catch (error) {
                 console.error('Test error:', error);
