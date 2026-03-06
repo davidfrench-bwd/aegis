@@ -455,7 +455,7 @@
         async function loadRuleConfig() {
             try {
                 // Try API first
-                const response = await fetch('http://localhost:3001/api/automation-rules/apex');
+                const response = await fetch('http://localhost:3456/api/automation-rules/apex');
                 if (response.ok) {
                     const config = await response.json();
                     populateRuleForm(config);
@@ -533,7 +533,7 @@
             };
 
             try {
-                const response = await fetch('http://localhost:3001/api/automation-rules/apex', {
+                const response = await fetch('http://localhost:3456/api/automation-rules/apex', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ rules: [rule] })
@@ -554,7 +554,7 @@
             alert('🧪 Running dry run test...\n\nCheck console for results.');
             
             try {
-                const response = await fetch('http://localhost:3001/api/automation-rules/test?clinic=apex&dry-run=true');
+                const response = await fetch('http://localhost:3456/api/automation-rules/test?clinic=apex&dry-run=true');
                 const result = await response.json();
                 
                 console.log('Dry run results:', result);
