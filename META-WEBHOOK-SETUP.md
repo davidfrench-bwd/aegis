@@ -24,6 +24,14 @@ Go to Vercel Project Settings → Environment Variables and add:
   5. Copy the token
 - **Important**: This is a USER token, not a Page token
 
+### META_AD_ACCOUNT_ID
+- **Value**: Your Meta Ad Account ID (numeric only, without "act_" prefix)
+- **Example**: `389246342161524` (for Apex Pain Solutions)
+- **How to find**:
+  1. Go to Meta Ads Manager
+  2. Look at the URL: `...act=123456789...`
+  3. The number after `act=` is your Ad Account ID
+
 ## Step 2: Configure Webhook in Meta Business Suite
 
 1. Go to https://developers.facebook.com/apps/

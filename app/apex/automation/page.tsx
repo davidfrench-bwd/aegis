@@ -32,15 +32,32 @@ interface Execution {
   new_budget?: number
 }
 
+interface MonitoredAdSet {
+  id: string
+  name: string
+  campaign_name: string
+  status: string
+  current_budget_usd: number
+}
+
+interface MonitoringData {
+  ad_sets: MonitoredAdSet[]
+  summary: {
+    total_monitored: number
+    total_budget_usd: number
+  }
+}
+
 export default function ApexAutomationPage() {
   const [user, setUser] = useState<any>(null)
   const [rule, setRule] = useState<Rule | null>(null)
   const [executions, setExecutions] = useState<Execution[]>([])
+  const [monitoring, setMonitoring] = useState<MonitoringData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadingMonitoring, setLoadingMonitoring] = useState(false)
   const [supabase, setSupabase] = useState<any>(null)
 
   useEffect(() => {
-    // Only create Supabase client on the client side
     if (typeof window !== 'undefined') {
       const client = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -97,6 +114,23 @@ export default function ApexAutomationPage() {
     }
   }
 
+  async function loadMonitoredAdSets() {
+    setLoadingMonitoring(true)
+    try {
+      const response = await fetch('/api/apex/rules/quiz-lead-boost/monitored-adsets')
+      if (response.ok) {
+        const data = await response.json()
+        setMonitoring(data.monitoring)
+      } else {
+        console.error('Failed to load monitored ad sets')
+      }
+    } catch (error) {
+      console.error('Error loading monitored ad sets:', error)
+    } finally {
+      setLoadingMonitoring(false)
+    }
+  }
+
   async function saveRule() {
     if (!rule) return
     
@@ -108,51 +142,26 @@ export default function ApexAutomationPage() {
       })
       
       if (response.ok) {
-        alert('Rule saved successfully!')
+        alert('Rule saved successfully')
+        loadRule()
       } else {
-        const error = await response.json()
-        alert(`Save failed: ${error.error}`)
+        alert('Failed to save rule')
       }
     } catch (error) {
-      console.error('Save error:', error)
-      alert('Failed to save rule')
-    }
-  }
-
-  async function runDryRun() {
-    try {
-      const response = await fetch('/api/apex/rules/quiz-lead-boost/dry-run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          adSetId: 'test-ad-set',
-          currentBudget: 100
-        })
-      })
-      
-      if (response.ok) {
-        const result = await response.json()
-        alert(`Dry Run Result: ${result.reason}`)
-        loadExecutions()
-      } else {
-        const error = await response.json()
-        alert(`Dry run failed: ${error.error}`)
-      }
-    } catch (error) {
-      console.error('Dry run error:', error)
-      alert('Failed to run dry run')
+      console.error('Failed to save rule:', error)
+      alert('Error saving rule')
     }
   }
 
   async function signOut() {
     if (supabase) {
       await supabase.auth.signOut()
-      window.location.href = '/'
+      window.location.href = '/login'
     }
   }
 
-  if (loading || !supabase) {
-    return <div style={{ padding: '20px' }}>Loading...</div>
+  if (loading) {
+    return <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
   }
 
   if (!user) {
@@ -161,103 +170,184 @@ export default function ApexAutomationPage() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <h1>Apex Pain Solutions — Automation Rules</h1>
-        <button onClick={signOut}>Sign Out</button>
+        <button onClick={signOut} style={{
+          padding: '8px 16px',
+          background: '#666',
+          color: 'white',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}>
+          Sign Out
+        </button>
       </div>
 
       {rule && (
-        <div style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
+        <div style={{ marginBottom: '30px', padding: '20px', background: '#f5f5f5', borderRadius: '8px' }}>
           <h2>{rule.name}</h2>
           
-          <div style={{ marginBottom: '10px' }}>
-            <label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '20px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Active</label>
               <input
                 type="checkbox"
                 checked={rule.is_active}
                 onChange={(e) => setRule({ ...rule, is_active: e.target.checked })}
               />
-              {' '}Active
-            </label>
-          </div>
+            </div>
 
-          <div style={{ marginBottom: '10px' }}>
-            <label>
-              Threshold: 
-              <input
-                type="number"
-                value={rule.threshold}
-                onChange={(e) => setRule({ ...rule, threshold: parseInt(e.target.value) })}
-                style={{ marginLeft: '10px', width: '100px' }}
-              />
-            </label>
-          </div>
-
-          <div style={{ marginBottom: '10px' }}>
-            <label>
-              Budget Increase %: 
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Percentage Change</label>
               <input
                 type="number"
                 value={rule.percentage_change}
-                onChange={(e) => setRule({ ...rule, percentage_change: parseFloat(e.target.value) })}
-                style={{ marginLeft: '10px', width: '100px' }}
+                onChange={(e) => setRule({ ...rule, percentage_change: parseInt(e.target.value) })}
+                style={{ width: '100%', padding: '8px' }}
               />
-            </label>
-          </div>
+            </div>
 
-          <div style={{ marginBottom: '10px' }}>
-            <label>
-              Max Daily Budget: 
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Max Daily Budget ($)</label>
               <input
                 type="number"
                 value={rule.max_daily_budget}
-                onChange={(e) => setRule({ ...rule, max_daily_budget: parseFloat(e.target.value) })}
-                style={{ marginLeft: '10px', width: '100px' }}
+                onChange={(e) => setRule({ ...rule, max_daily_budget: parseInt(e.target.value) })}
+                style={{ width: '100%', padding: '8px' }}
               />
-            </label>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Campaign Filter</label>
+              <input
+                type="text"
+                value={rule.campaign_name_filter}
+                onChange={(e) => setRule({ ...rule, campaign_name_filter: e.target.value })}
+                style={{ width: '100%', padding: '8px' }}
+              />
+            </div>
           </div>
 
-          <div style={{ marginTop: '20px' }}>
-            <button onClick={saveRule} style={{ marginRight: '10px' }}>Save Changes</button>
-            <button onClick={runDryRun} style={{ marginRight: '10px' }}>Test Rule (Dry Run)</button>
-            <button onClick={loadExecutions}>Refresh Logs</button>
-          </div>
+          <button
+            onClick={saveRule}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              background: '#000',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Save Rule
+          </button>
         </div>
       )}
 
-      <div style={{ background: '#fff', padding: '20px', borderRadius: '8px' }}>
-        <h3>Recent Executions</h3>
-        {executions.length === 0 ? (
-          <p>No executions yet</p>
+      {/* Monitored Ad Sets Section */}
+      <div style={{ marginBottom: '30px', padding: '20px', background: '#fff', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2>Monitored Ad Sets</h2>
+          <button
+            onClick={loadMonitoredAdSets}
+            disabled={loadingMonitoring}
+            style={{
+              padding: '8px 16px',
+              background: loadingMonitoring ? '#ccc' : '#0066cc',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: loadingMonitoring ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loadingMonitoring ? 'Loading...' : 'Refresh'}
+          </button>
+        </div>
+
+        {monitoring ? (
+          <>
+            <div style={{ marginBottom: '20px', padding: '15px', background: '#f0f8ff', borderRadius: '4px' }}>
+              <strong>Total Ad Sets Monitored:</strong> {monitoring.summary.total_monitored}<br />
+              <strong>Total Daily Budget:</strong> ${monitoring.summary.total_budget_usd.toFixed(2)}
+            </div>
+
+            {monitoring.ad_sets.length > 0 ? (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+                    <th style={{ padding: '10px', textAlign: 'left' }}>Ad Set Name</th>
+                    <th style={{ padding: '10px', textAlign: 'left' }}>Campaign</th>
+                    <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
+                    <th style={{ padding: '10px', textAlign: 'right' }}>Daily Budget</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monitoring.ad_sets.map((adSet) => (
+                    <tr key={adSet.id} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '10px' }}>{adSet.name}</td>
+                      <td style={{ padding: '10px' }}>{adSet.campaign_name}</td>
+                      <td style={{ padding: '10px' }}>
+                        <span style={{
+                          padding: '3px 8px',
+                          borderRadius: '3px',
+                          background: adSet.status === 'ACTIVE' ? '#d4edda' : '#f8d7da',
+                          color: adSet.status === 'ACTIVE' ? '#155724' : '#721c24',
+                          fontSize: '12px'
+                        }}>
+                          {adSet.status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px', textAlign: 'right' }}>
+                        ${adSet.current_budget_usd.toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p style={{ color: '#666', fontStyle: 'italic' }}>No ad sets found matching the rule criteria.</p>
+            )}
+          </>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <p style={{ color: '#666', fontStyle: 'italic' }}>Click "Refresh" to load monitored ad sets from Meta.</p>
+        )}
+      </div>
+
+      {/* Recent Executions */}
+      <div style={{ padding: '20px', background: '#fff', border: '1px solid #ddd', borderRadius: '8px' }}>
+        <h2>Recent Executions</h2>
+        
+        {executions.length > 0 ? (
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
             <thead>
-              <tr>
-                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Time</th>
-                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Status</th>
-                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Reason</th>
+              <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Time</th>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Reason</th>
+                <th style={{ padding: '10px', textAlign: 'right' }}>Budget Change</th>
               </tr>
             </thead>
             <tbody>
               {executions.map((exec) => (
-                <tr key={exec.id}>
-                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
+                <tr key={exec.id} style={{ borderBottom: '1px solid #eee' }}>
+                  <td style={{ padding: '10px' }}>
                     {new Date(exec.created_at).toLocaleString()}
                   </td>
-                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                    <span style={{
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      background: exec.status === 'success' ? '#d4edda' : exec.status === 'error' ? '#f8d7da' : '#fff3cd'
-                    }}>
-                      {exec.status}
-                    </span>
+                  <td style={{ padding: '10px' }}>{exec.status}</td>
+                  <td style={{ padding: '10px' }}>{exec.reason}</td>
+                  <td style={{ padding: '10px', textAlign: 'right' }}>
+                    {exec.old_budget && exec.new_budget
+                      ? `$${exec.old_budget} → $${exec.new_budget}`
+                      : '—'}
                   </td>
-                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{exec.reason}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        ) : (
+          <p style={{ marginTop: '15px', color: '#666', fontStyle: 'italic' }}>No executions yet</p>
         )}
       </div>
     </div>
