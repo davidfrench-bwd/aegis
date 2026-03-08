@@ -1,43 +1,57 @@
 /**
  * Meta API integration for ad set budget management
  * 
- * CURRENT STATUS: SIMULATED
- * Live Meta API integration disabled pending verification
+ * CURRENT STATUS: LIVE
+ * Uses real Meta Graph API calls
  */
 
+import { fetchAdSetDetails, updateAdSetBudget as graphUpdateBudget } from '@/app/lib/meta/graph-api'
+
 export async function fetchMetaAdSetBudget(adSetId: string): Promise<number> {
-  console.warn(`[SIMULATED] Fetching budget for Ad Set: ${adSetId}`)
+  console.log(`[LIVE] Fetching budget for Ad Set: ${adSetId}`)
   
-  // TODO: Implement real Meta API call
-  // const accessToken = process.env.META_ACCESS_TOKEN
-  // const response = await fetch(`https://graph.facebook.com/v18.0/${adSetId}?fields=daily_budget&access_token=${accessToken}`)
-  // const data = await response.json()
-  // return parseFloat(data.daily_budget) / 100
+  const adSetDetails = await fetchAdSetDetails(adSetId)
   
-  return 100.00
+  if (!adSetDetails || !adSetDetails.daily_budget) {
+    console.error(`Failed to fetch budget for ad set ${adSetId}`)
+    throw new Error(`Could not fetch budget for ad set ${adSetId}`)
+  }
+  
+  // Meta returns budget in cents, convert to dollars
+  const budgetDollars = parseFloat(adSetDetails.daily_budget) / 100
+  console.log(`[LIVE] Ad Set ${adSetId} current budget: $${budgetDollars}`)
+  
+  return budgetDollars
 }
 
 export async function updateMetaAdSetBudget(
   adSetId: string,
   newBudget: number
 ): Promise<{ success: boolean; simulated: boolean; message: string; adSetId: string; newBudget: number }> {
-  console.warn(`[SIMULATED] Would update Ad Set ${adSetId} to $${newBudget}`)
+  console.log(`[LIVE] Updating Ad Set ${adSetId} to $${newBudget}`)
   
-  // TODO: Implement real Meta API call
-  // const accessToken = process.env.META_ACCESS_TOKEN
-  // const response = await fetch(`https://graph.facebook.com/v18.0/${adSetId}`, {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({
-  //     daily_budget: Math.round(newBudget * 100),
-  //     access_token: accessToken
-  //   })
-  // })
+  // Convert dollars to cents for Meta API
+  const newBudgetCents = Math.round(newBudget * 100)
+  
+  const result = await graphUpdateBudget(adSetId, newBudgetCents)
+  
+  if (!result.success) {
+    console.error(`Failed to update budget for ad set ${adSetId}: ${result.error}`)
+    return {
+      success: false,
+      simulated: false,
+      message: result.error || 'Failed to update budget',
+      adSetId,
+      newBudget
+    }
+  }
+  
+  console.log(`[LIVE] Successfully updated Ad Set ${adSetId} to $${newBudget}`)
   
   return {
     success: true,
-    simulated: true,
-    message: 'Simulated budget update - no real Meta API call made',
+    simulated: false,
+    message: 'Live budget update successful',
     adSetId,
     newBudget
   }
