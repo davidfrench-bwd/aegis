@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/app/lib/supabase/server'
+import { createClient } from '@/app/lib/supabase/server'
 import { getRuleMonitoringStatus } from '@/app/lib/meta/campaign-search'
 
 /**
@@ -11,7 +11,7 @@ import { getRuleMonitoringStatus } from '@/app/lib/meta/campaign-search'
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const supabase = createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
