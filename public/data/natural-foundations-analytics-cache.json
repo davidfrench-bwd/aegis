@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1772800321027,
+  "lastUpdated": 1772969539781,
   "locationId": "K8Ch9TAp0gPQNwdiMjw1",
   "clinicName": "Natural Foundations",
   "metrics": [
@@ -97,8 +97,8 @@
       "phoneConsults": 21,
       "phoneConsultShows": 21,
       "phoneConsultNoShows": 0,
-      "exams": 8,
-      "commits": 2,
+      "exams": 9,
+      "commits": 3,
       "selfScheduled": 0,
       "adSpend": 2088.29
     },
@@ -111,7 +111,7 @@
       "exams": 2,
       "commits": 0,
       "selfScheduled": 0,
-      "adSpend": 380.47
+      "adSpend": 509.11
     }
   ]
 }

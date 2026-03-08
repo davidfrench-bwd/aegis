@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1772800369461,
+  "lastUpdated": 1772969621736,
   "locationId": "S5fSjXbQaZfB9GmpkW5m",
   "clinicName": "Thrive Restoration Clinic",
   "metrics": [
@@ -159,14 +159,14 @@
     },
     {
       "month": "2026-03",
-      "leads": 27,
-      "phoneConsults": 5,
-      "phoneConsultShows": 5,
+      "leads": 42,
+      "phoneConsults": 9,
+      "phoneConsultShows": 9,
       "phoneConsultNoShows": 0,
-      "exams": 2,
+      "exams": 4,
       "commits": 0,
       "selfScheduled": 0,
-      "adSpend": 1003.88
+      "adSpend": 1209.33
     }
   ]
 }
