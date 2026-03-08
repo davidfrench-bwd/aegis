@@ -56,6 +56,7 @@ export default function ApexAutomationPage() {
   const [monitoring, setMonitoring] = useState<MonitoringData | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMonitoring, setLoadingMonitoring] = useState(false)
+  const [runningRule, setRunningRule] = useState(false)
   const [supabase, setSupabase] = useState<any>(null)
 
   useEffect(() => {
@@ -157,6 +158,38 @@ export default function ApexAutomationPage() {
     } catch (error) {
       console.error('Failed to save rule:', error)
       alert('Error saving rule')
+    }
+  }
+
+  async function runRuleNow() {
+    setRunningRule(true)
+    try {
+      const response = await fetch('/api/cron/evaluate-rules')
+      const data = await response.json()
+      
+      if (response.ok) {
+        const summary = data.results?.[0]
+        if (summary) {
+          alert(
+            `Rule Evaluation Complete!\n\n` +
+            `Ad Sets Checked: ${summary.ad_sets_checked}\n` +
+            `Budgets Increased: ${summary.budgets_increased}\n` +
+            `Total Budget Change: $${summary.total_budget_change.toFixed(2)}\n` +
+            `Errors: ${summary.errors}`
+          )
+        } else {
+          alert('Rule evaluation completed (no active rules)')
+        }
+        // Reload executions to show new results
+        loadExecutions()
+      } else {
+        alert(`Error: ${data.error || 'Failed to run rule'}`)
+      }
+    } catch (error) {
+      console.error('Error running rule:', error)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setRunningRule(false)
     }
   }
 
@@ -262,20 +295,36 @@ export default function ApexAutomationPage() {
             </div>
           </div>
 
-          <button
-            onClick={saveRule}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              background: '#000',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Save Rule
-          </button>
+          <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+            <button
+              onClick={saveRule}
+              style={{
+                padding: '10px 20px',
+                background: '#000',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Save Rule
+            </button>
+
+            <button
+              onClick={runRuleNow}
+              disabled={runningRule}
+              style={{
+                padding: '10px 20px',
+                background: runningRule ? '#ccc' : '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: runningRule ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {runningRule ? 'Running...' : '▶ Run Now'}
+            </button>
+          </div>
         </div>
       )}
 
