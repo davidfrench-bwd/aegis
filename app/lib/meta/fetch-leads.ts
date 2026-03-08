@@ -111,20 +111,29 @@ export async function getAdSetLeadMetrics(adSetId: string): Promise<{
       leadsToday = leadAction ? parseInt(leadAction.value) : 0
     }
 
-    // Fetch LIFETIME leads
-    const lifetimeUrl = `https://graph.facebook.com/v18.0/${adSetId}/insights?fields=actions&date_preset=lifetime&access_token=${accessToken}`
+    // Fetch LIFETIME leads using last_90d (Meta doesn't support true "lifetime" for all accounts)
+    // Alternative: use a very wide date range
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0]
+    const timeRange = `{"since":"${ninetyDaysAgo}","until":"${today}"}`
+    
+    const lifetimeUrl = `https://graph.facebook.com/v18.0/${adSetId}/insights?fields=actions&time_range=${encodeURIComponent(timeRange)}&access_token=${accessToken}`
     
     const lifetimeResponse = await fetch(lifetimeUrl)
     
     let leadsLifetime = 0
     if (lifetimeResponse.ok) {
       const lifetimeData = await lifetimeResponse.json()
+      console.log(`[META DEBUG] Last 90 days response for ${adSetId}:`, JSON.stringify(lifetimeData))
       const lifetimeInsights = lifetimeData.data?.[0]
       
       if (lifetimeInsights?.actions) {
         const leadAction = lifetimeInsights.actions.find((a: any) => a.action_type === 'lead')
         leadsLifetime = leadAction ? parseInt(leadAction.value) : 0
       }
+    } else {
+      const error = await lifetimeResponse.json()
+      console.error('[META] Last 90 days insights error:', error)
     }
 
     console.log(`[META] Ad set ${adSetId}: ${leadsToday} today, ${leadsLifetime} lifetime (${todayInsights?.date_start} to ${todayInsights?.date_stop})`)

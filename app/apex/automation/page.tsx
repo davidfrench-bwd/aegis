@@ -374,7 +374,7 @@ export default function ApexAutomationPage() {
                       <th style={{ padding: '10px', textAlign: 'left' }}>Campaign</th>
                       <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
                       <th style={{ padding: '10px', textAlign: 'right' }}>Leads Today</th>
-                      <th style={{ padding: '10px', textAlign: 'right' }}>Leads Total</th>
+                      <th style={{ padding: '10px', textAlign: 'right' }}>Leads (90d)</th>
                       <th style={{ padding: '10px', textAlign: 'right' }}>Daily Budget</th>
                     </tr>
                   </thead>
