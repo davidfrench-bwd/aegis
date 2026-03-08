@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/supabase/service'
 import { getCampaignAdSets } from '@/app/lib/meta/campaign-adsets'
 import { fetchMetaAdSetBudget, updateMetaAdSetBudget } from '@/app/lib/automation/meta-api'
+import { getAdSetLeadCount } from '@/app/lib/meta/fetch-leads'
 
 /**
  * Cron job endpoint - evaluates all active rules periodically
@@ -147,19 +148,9 @@ export async function GET(request: NextRequest) {
             continue
           }
 
-          // Count leads in the time window
-          const timeWindowStart = new Date(
-            Date.now() - rule.time_window_hours * 60 * 60 * 1000
-          ).toISOString()
-
-          const { count: leadCount } = await supabase
-            .from('lead_events')
-            .select('*', { count: 'exact', head: true })
-            .eq('clinic_id', rule.clinic_id)
-            .eq('ad_set_id', adSet.id)
-            .gte('created_at', timeWindowStart)
-
-          const leadsReceived = leadCount || 0
+          // Count leads directly from Meta API (not from webhook table)
+          const leadCountResult = await getAdSetLeadCount(adSet.id, rule.time_window_hours)
+          const leadsReceived = leadCountResult.lead_count
 
           console.log(`[CRON] Ad set ${adSet.name}: ${leadsReceived} leads in last ${rule.time_window_hours}h (threshold: ${rule.threshold})`)
 
