@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 interface Rule {
   id: string
   clinic_id: string
@@ -34,17 +37,28 @@ export default function ApexAutomationPage() {
   const [rule, setRule] = useState<Rule | null>(null)
   const [executions, setExecutions] = useState<Execution[]>([])
   const [loading, setLoading] = useState(true)
-  
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const [supabase, setSupabase] = useState<any>(null)
 
   useEffect(() => {
-    checkUser()
+    // Only create Supabase client on the client side
+    if (typeof window !== 'undefined') {
+      const client = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+      setSupabase(client)
+    }
   }, [])
 
+  useEffect(() => {
+    if (supabase) {
+      checkUser()
+    }
+  }, [supabase])
+
   async function checkUser() {
+    if (!supabase) return
+    
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -131,11 +145,13 @@ export default function ApexAutomationPage() {
   }
 
   async function signOut() {
-    await supabase.auth.signOut()
-    window.location.href = '/'
+    if (supabase) {
+      await supabase.auth.signOut()
+      window.location.href = '/'
+    }
   }
 
-  if (loading) {
+  if (loading || !supabase) {
     return <div style={{ padding: '20px' }}>Loading...</div>
   }
 
