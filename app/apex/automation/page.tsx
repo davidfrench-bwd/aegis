@@ -192,6 +192,9 @@ export default function ApexAutomationPage() {
 
       {rule && (
         <div style={{ marginBottom: '30px', padding: '20px', background: '#f5f5f5', borderRadius: '8px' }}>
+          <div style={{ marginBottom: '15px', padding: '10px', background: '#e3f2fd', borderRadius: '4px', fontSize: '14px' }}>
+            ℹ️ <strong>Automatic Evaluation:</strong> This rule runs every hour via Vercel Cron. It checks all monitored ad sets and increases budgets based on recent lead count.
+          </div>
           <h2>{rule.name}</h2>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '20px' }}>
@@ -222,6 +225,28 @@ export default function ApexAutomationPage() {
                 onChange={(e) => setRule({ ...rule, max_daily_budget: parseInt(e.target.value) })}
                 style={{ width: '100%', padding: '8px' }}
               />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Time Window (hours)</label>
+              <input
+                type="number"
+                value={rule.time_window_hours}
+                onChange={(e) => setRule({ ...rule, time_window_hours: parseInt(e.target.value) })}
+                style={{ width: '100%', padding: '8px' }}
+              />
+              <small style={{ color: '#666' }}>Check leads in the last X hours</small>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Lead Threshold</label>
+              <input
+                type="number"
+                value={rule.threshold}
+                onChange={(e) => setRule({ ...rule, threshold: parseInt(e.target.value) })}
+                style={{ width: '100%', padding: '8px' }}
+              />
+              <small style={{ color: '#666' }}>Increase budget if ≥ this many leads</small>
             </div>
 
             <div>
