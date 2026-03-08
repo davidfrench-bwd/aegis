@@ -118,14 +118,19 @@ export default function ApexAutomationPage() {
     setLoadingMonitoring(true)
     try {
       const response = await fetch('/api/apex/rules/quiz-lead-boost/monitored-adsets')
+      const data = await response.json()
+      
+      console.log('Monitored ad sets response:', response.status, data)
+      
       if (response.ok) {
-        const data = await response.json()
         setMonitoring(data.monitoring)
       } else {
-        console.error('Failed to load monitored ad sets')
+        console.error('Failed to load monitored ad sets:', data)
+        alert(`Error: ${data.error || 'Failed to load ad sets'}`)
       }
     } catch (error) {
       console.error('Error loading monitored ad sets:', error)
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoadingMonitoring(false)
     }
