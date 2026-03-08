@@ -87,6 +87,7 @@ export default function ApexAutomationPage() {
     setUser(user)
     loadRule()
     loadExecutions()
+    loadMonitoredAdSets()
   }
 
   async function loadRule() {
