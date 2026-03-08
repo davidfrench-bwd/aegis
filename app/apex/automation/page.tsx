@@ -40,8 +40,10 @@ interface MonitoredAdSet {
   campaign_name: string
   status: string
   current_budget_usd: number
-  last_lead_date?: string
   lead_count_today?: number
+  lead_count_lifetime?: number
+  date_range_start?: string
+  date_range_end?: string
 }
 
 interface MonitoringData {
@@ -359,42 +361,56 @@ export default function ApexAutomationPage() {
             </div>
 
             {monitoring.ad_sets.length > 0 ? (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
-                    <th style={{ padding: '10px', textAlign: 'left' }}>Ad Set Name</th>
-                    <th style={{ padding: '10px', textAlign: 'left' }}>Campaign</th>
-                    <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
-                    <th style={{ padding: '10px', textAlign: 'right' }}>Leads Today</th>
-                    <th style={{ padding: '10px', textAlign: 'right' }}>Daily Budget</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {monitoring.ad_sets.map((adSet) => (
-                    <tr key={adSet.id} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '10px' }}>{adSet.name}</td>
-                      <td style={{ padding: '10px' }}>{adSet.campaign_name}</td>
-                      <td style={{ padding: '10px' }}>
-                        <span style={{
-                          padding: '3px 8px',
-                          borderRadius: '3px',
-                          background: adSet.status === 'ACTIVE' ? '#d4edda' : '#f8d7da',
-                          color: adSet.status === 'ACTIVE' ? '#155724' : '#721c24',
-                          fontSize: '12px'
-                        }}>
-                          {adSet.status}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px', textAlign: 'right' }}>
-                        <strong>{adSet.lead_count_today || 0}</strong>
-                      </td>
-                      <td style={{ padding: '10px', textAlign: 'right' }}>
-                        ${adSet.current_budget_usd.toFixed(2)}
-                      </td>
+              <>
+                {monitoring.ad_sets[0]?.date_range_start && (
+                  <div style={{ marginBottom: '10px', fontSize: '13px', color: '#666' }}>
+                    📅 Date Range: {monitoring.ad_sets[0].date_range_start} to {monitoring.ad_sets[0].date_range_end}
+                  </div>
+                )}
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+                      <th style={{ padding: '10px', textAlign: 'left' }}>Ad Set Name</th>
+                      <th style={{ padding: '10px', textAlign: 'left' }}>Campaign</th>
+                      <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
+                      <th style={{ padding: '10px', textAlign: 'right' }}>Leads Today</th>
+                      <th style={{ padding: '10px', textAlign: 'right' }}>Leads Total</th>
+                      <th style={{ padding: '10px', textAlign: 'right' }}>Daily Budget</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {monitoring.ad_sets.map((adSet) => (
+                      <tr key={adSet.id} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '10px' }}>{adSet.name}</td>
+                        <td style={{ padding: '10px' }}>{adSet.campaign_name}</td>
+                        <td style={{ padding: '10px' }}>
+                          <span style={{
+                            padding: '3px 8px',
+                            borderRadius: '3px',
+                            background: adSet.status === 'ACTIVE' ? '#d4edda' : '#f8d7da',
+                            color: adSet.status === 'ACTIVE' ? '#155724' : '#721c24',
+                            fontSize: '12px'
+                          }}>
+                            {adSet.status}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px', textAlign: 'right' }}>
+                          <strong style={{ color: (adSet.lead_count_today || 0) > 0 ? '#28a745' : '#666' }}>
+                            {adSet.lead_count_today || 0}
+                          </strong>
+                        </td>
+                        <td style={{ padding: '10px', textAlign: 'right', color: '#666' }}>
+                          {adSet.lead_count_lifetime || 0}
+                        </td>
+                        <td style={{ padding: '10px', textAlign: 'right' }}>
+                          ${adSet.current_budget_usd.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            
             ) : (
               <p style={{ color: '#666', fontStyle: 'italic' }}>No ad sets found matching the rule criteria.</p>
             )}

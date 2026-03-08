@@ -74,10 +74,14 @@ export async function getAdSetLeadCount(
 }
 
 /**
- * Get lead count for "today" (Meta's definition)
- * Meta considers "today" to be the current calendar day in ad account timezone
+ * Get lead metrics for an ad set
  */
-export async function getAdSetLeadCountToday(adSetId: string): Promise<number> {
+export async function getAdSetLeadMetrics(adSetId: string): Promise<{
+  leads_today: number
+  leads_lifetime: number
+  date_range_start?: string
+  date_range_end?: string
+}> {
   const accessToken = process.env.META_ACCESS_TOKEN
 
   if (!accessToken) {
@@ -85,37 +89,63 @@ export async function getAdSetLeadCountToday(adSetId: string): Promise<number> {
   }
 
   try {
-    // Use 'today' preset
-    const fields = 'actions'
-    const datePreset = 'today'
+    // Fetch TODAY leads
+    const todayUrl = `https://graph.facebook.com/v18.0/${adSetId}/insights?fields=actions,date_start,date_stop&date_preset=today&access_token=${accessToken}`
     
-    const url = `https://graph.facebook.com/v18.0/${adSetId}/insights?fields=${fields}&date_preset=${datePreset}&access_token=${accessToken}`
+    console.log(`[META] Fetching lead metrics for ad set ${adSetId}`)
     
-    console.log(`[META] Fetching TODAY lead count for ad set ${adSetId}`)
+    const todayResponse = await fetch(todayUrl)
     
-    const response = await fetch(url)
-    
-    if (!response.ok) {
-      const error = await response.json()
-      console.error('[META] Insights API error:', error)
-      throw new Error(`Failed to fetch insights: ${error.error?.message || 'Unknown error'}`)
+    if (!todayResponse.ok) {
+      const error = await todayResponse.json()
+      console.error('[META] Insights API error (today):', error)
+      throw new Error(`Failed to fetch today insights: ${error.error?.message || 'Unknown error'}`)
     }
 
-    const data = await response.json()
-    const insights = data.data?.[0]
+    const todayData = await todayResponse.json()
+    const todayInsights = todayData.data?.[0]
 
-    // Find 'lead' action in the actions array
-    let leadCount = 0
-    if (insights?.actions) {
-      const leadAction = insights.actions.find((a: any) => a.action_type === 'lead')
-      leadCount = leadAction ? parseInt(leadAction.value) : 0
+    let leadsToday = 0
+    if (todayInsights?.actions) {
+      const leadAction = todayInsights.actions.find((a: any) => a.action_type === 'lead')
+      leadsToday = leadAction ? parseInt(leadAction.value) : 0
     }
 
-    console.log(`[META] Ad set ${adSetId}: ${leadCount} leads TODAY`)
+    // Fetch LIFETIME leads
+    const lifetimeUrl = `https://graph.facebook.com/v18.0/${adSetId}/insights?fields=actions&date_preset=lifetime&access_token=${accessToken}`
+    
+    const lifetimeResponse = await fetch(lifetimeUrl)
+    
+    let leadsLifetime = 0
+    if (lifetimeResponse.ok) {
+      const lifetimeData = await lifetimeResponse.json()
+      const lifetimeInsights = lifetimeData.data?.[0]
+      
+      if (lifetimeInsights?.actions) {
+        const leadAction = lifetimeInsights.actions.find((a: any) => a.action_type === 'lead')
+        leadsLifetime = leadAction ? parseInt(leadAction.value) : 0
+      }
+    }
 
-    return leadCount
+    console.log(`[META] Ad set ${adSetId}: ${leadsToday} today, ${leadsLifetime} lifetime (${todayInsights?.date_start} to ${todayInsights?.date_stop})`)
+
+    return {
+      leads_today: leadsToday,
+      leads_lifetime: leadsLifetime,
+      date_range_start: todayInsights?.date_start,
+      date_range_end: todayInsights?.date_stop
+    }
   } catch (error) {
-    console.error('[META] Error fetching today lead count:', error)
+    console.error('[META] Error fetching lead metrics:', error)
     throw error
   }
+}
+
+/**
+ * Get lead count for "today" (Meta's definition)
+ * Meta considers "today" to be the current calendar day in ad account timezone
+ */
+export async function getAdSetLeadCountToday(adSetId: string): Promise<number> {
+  const metrics = await getAdSetLeadMetrics(adSetId)
+  return metrics.leads_today
 }
