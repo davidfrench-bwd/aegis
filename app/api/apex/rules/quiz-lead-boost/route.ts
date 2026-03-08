@@ -63,7 +63,8 @@ export async function PUT(request: NextRequest) {
       percentage_change: body.percentage_change,
       max_daily_budget: body.max_daily_budget,
       frequency_limit: body.frequency_limit,
-      campaign_name_filter: body.campaign_name_filter,
+      campaign_id: body.campaign_id || null,
+      campaign_name_filter: body.campaign_name_filter || null,
       ad_set_status_filter: body.ad_set_status_filter
     }
 
