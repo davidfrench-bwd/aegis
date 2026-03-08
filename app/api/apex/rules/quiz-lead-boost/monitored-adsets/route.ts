@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/app/lib/supabase/server'
-import { getRuleMonitoringStatus } from '@/app/lib/meta/campaign-search'
+import { getCampaignAdSets } from '@/app/lib/meta/campaign-adsets'
 
 /**
  * GET /api/apex/rules/quiz-lead-boost/monitored-adsets
@@ -30,14 +30,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Rule not found' }, { status: 404 })
     }
 
-    // Get ad account ID from environment
-    // TODO: Should come from clinic configuration
-    const adAccountId = process.env.META_AD_ACCOUNT_ID || '389246342161524'
+    // Check if campaign_id is set
+    if (!rule.campaign_id) {
+      return NextResponse.json({ 
+        error: 'Campaign ID not set. Please configure the campaign ID in the rule settings.' 
+      }, { status: 400 })
+    }
 
     // Fetch monitored ad sets from Meta
-    const monitoring = await getRuleMonitoringStatus(
-      adAccountId,
-      rule.campaign_name_filter || 'Quiz',
+    const monitoring = await getCampaignAdSets(
+      rule.campaign_id,
       rule.ad_set_status_filter as 'ACTIVE' | null
     )
 
@@ -46,11 +48,12 @@ export async function GET(request: NextRequest) {
         id: rule.id,
         name: rule.name,
         is_active: rule.is_active,
-        campaign_filter: rule.campaign_name_filter,
+        campaign_id: rule.campaign_id,
         status_filter: rule.ad_set_status_filter
       },
       monitoring: {
-        ad_sets: monitoring.adSets,
+        campaign_name: monitoring.campaign_name,
+        ad_sets: monitoring.ad_sets,
         summary: monitoring.summary
       }
     })

@@ -77,20 +77,20 @@ export async function evaluateQuizLeadBoost(params: {
       return { status: 'skipped', reason: 'No active rule found' }
     }
 
-    // 2. Validate campaign filter
-    if (!leadEvent.campaign_name?.toLowerCase().includes('quiz')) {
+    // 2. Validate campaign ID matches
+    if (rule.campaign_id && leadEvent.campaign_id !== rule.campaign_id) {
       await logExecution({
         ruleId: rule.id,
         clinicId,
         adSetId: leadEvent.ad_set_id,
         status: 'skipped',
         triggered: false,
-        reason: `Campaign '${leadEvent.campaign_name}' does not match filter`
+        reason: `Campaign ID '${leadEvent.campaign_id}' does not match rule campaign '${rule.campaign_id}'`
       })
       
       return {
         status: 'skipped',
-        reason: `Campaign '${leadEvent.campaign_name}' does not match filter`
+        reason: `Campaign ID '${leadEvent.campaign_id}' does not match rule campaign '${rule.campaign_id}'`
       }
     }
 

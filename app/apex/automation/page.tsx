@@ -19,7 +19,8 @@ interface Rule {
   percentage_change: number
   max_daily_budget: number
   frequency_limit: string
-  campaign_name_filter: string
+  campaign_id?: string
+  campaign_name_filter?: string
   ad_set_status_filter: string
 }
 
@@ -224,11 +225,12 @@ export default function ApexAutomationPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Campaign Filter</label>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Campaign ID</label>
               <input
                 type="text"
-                value={rule.campaign_name_filter}
-                onChange={(e) => setRule({ ...rule, campaign_name_filter: e.target.value })}
+                value={rule.campaign_id || ''}
+                onChange={(e) => setRule({ ...rule, campaign_id: e.target.value })}
+                placeholder="e.g., 120212345678901234"
                 style={{ width: '100%', padding: '8px' }}
               />
             </div>
