@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/app/lib/supabase/server'
 import { getCampaignAdSets } from '@/app/lib/meta/campaign-adsets'
+import { getAdSetLeadCountToday } from '@/app/lib/meta/fetch-leads'
 
 /**
  * GET /api/apex/rules/quiz-lead-boost/monitored-adsets
@@ -43,6 +44,25 @@ export async function GET(request: NextRequest) {
       rule.ad_set_status_filter as 'ACTIVE' | null
     )
 
+    // Enrich with lead count for today
+    const adSetsWithLeads = await Promise.all(
+      monitoring.ad_sets.map(async (adSet) => {
+        try {
+          const leadCountToday = await getAdSetLeadCountToday(adSet.id)
+          return {
+            ...adSet,
+            lead_count_today: leadCountToday
+          }
+        } catch (error) {
+          console.error(`Failed to get lead count for ${adSet.id}:`, error)
+          return {
+            ...adSet,
+            lead_count_today: 0
+          }
+        }
+      })
+    )
+
     return NextResponse.json({
       rule: {
         id: rule.id,
@@ -53,7 +73,7 @@ export async function GET(request: NextRequest) {
       },
       monitoring: {
         campaign_name: monitoring.campaign_name,
-        ad_sets: monitoring.ad_sets,
+        ad_sets: adSetsWithLeads,
         summary: monitoring.summary
       }
     })

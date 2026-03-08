@@ -29,6 +29,7 @@ interface Execution {
   status: string
   reason: string
   created_at: string
+  ad_set_name?: string
   old_budget?: number
   new_budget?: number
 }
@@ -39,6 +40,8 @@ interface MonitoredAdSet {
   campaign_name: string
   status: string
   current_budget_usd: number
+  last_lead_date?: string
+  lead_count_today?: number
 }
 
 interface MonitoringData {
@@ -362,6 +365,7 @@ export default function ApexAutomationPage() {
                     <th style={{ padding: '10px', textAlign: 'left' }}>Ad Set Name</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Campaign</th>
                     <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
+                    <th style={{ padding: '10px', textAlign: 'right' }}>Leads Today</th>
                     <th style={{ padding: '10px', textAlign: 'right' }}>Daily Budget</th>
                   </tr>
                 </thead>
@@ -380,6 +384,9 @@ export default function ApexAutomationPage() {
                         }}>
                           {adSet.status}
                         </span>
+                      </td>
+                      <td style={{ padding: '10px', textAlign: 'right' }}>
+                        <strong>{adSet.lead_count_today || 0}</strong>
                       </td>
                       <td style={{ padding: '10px', textAlign: 'right' }}>
                         ${adSet.current_budget_usd.toFixed(2)}
@@ -406,6 +413,7 @@ export default function ApexAutomationPage() {
             <thead>
               <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
                 <th style={{ padding: '10px', textAlign: 'left' }}>Time</th>
+                <th style={{ padding: '10px', textAlign: 'left' }}>Ad Set</th>
                 <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
                 <th style={{ padding: '10px', textAlign: 'left' }}>Reason</th>
                 <th style={{ padding: '10px', textAlign: 'right' }}>Budget Change</th>
@@ -417,6 +425,7 @@ export default function ApexAutomationPage() {
                   <td style={{ padding: '10px' }}>
                     {new Date(exec.created_at).toLocaleString()}
                   </td>
+                  <td style={{ padding: '10px', fontSize: '13px' }}>{exec.ad_set_name || '—'}</td>
                   <td style={{ padding: '10px' }}>{exec.status}</td>
                   <td style={{ padding: '10px' }}>{exec.reason}</td>
                   <td style={{ padding: '10px', textAlign: 'right' }}>
