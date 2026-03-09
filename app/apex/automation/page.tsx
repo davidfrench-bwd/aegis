@@ -297,10 +297,12 @@ export default function ApexAutomationPage() {
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Max Daily Budget ($)</label>
               <input
                 type="number"
-                value={rule.max_daily_budget}
-                onChange={(e) => setRule({ ...rule, max_daily_budget: parseInt(e.target.value) })}
+                value={rule.max_daily_budget / 100}
+                onChange={(e) => setRule({ ...rule, max_daily_budget: Math.round(parseFloat(e.target.value) * 100) })}
+                step="0.01"
                 style={{ width: '100%', padding: '8px' }}
               />
+              <small style={{ color: '#666' }}>Maximum daily budget per ad set in dollars</small>
             </div>
 
             <div>
