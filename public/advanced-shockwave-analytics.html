@@ -220,9 +220,9 @@
                 return;
             }
             
-            // Check if user has access to apex clinic
+            // Check if user has access to advanced-shockwave clinic
             const profile = await getUserProfile(user.id);
-            const hasAccess = profile.role === 'admin' || (profile.clinic_access && profile.clinic_access.includes('apex'));
+            const hasAccess = profile.role === 'admin' || (profile.clinic_access && profile.clinic_access.includes('advanced-shockwave'));
             
             if (!hasAccess) {
                 window.location.href = '/login.html';
