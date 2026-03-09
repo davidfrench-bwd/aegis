@@ -137,6 +137,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Check for force parameter (bypasses frequency check)
+    const { searchParams } = new URL(request.url)
+    const force = searchParams.get('force') === 'true'
+
     const supabase = createServiceClient()
 
     // 1. Get all active rules
@@ -159,23 +163,25 @@ export async function GET(request: NextRequest) {
       let totalBudgetChange = 0
       let errors = 0
 
-      console.log(`[CRON] Evaluating rule: ${rule.name} (${rule.id})`)
+      console.log(`[CRON] Evaluating rule: ${rule.name} (${rule.id})${force ? ' [FORCED]' : ''}`)
 
-      // Check if rule should run based on frequency setting
-      const frequencyHours = frequencyToHours(rule.frequency_limit || 'every_hour')
-      const shouldRun = await shouldRuleRun(rule.id, rule.clinic_id, frequencyHours)
-      
-      if (!shouldRun) {
-        console.log(`[CRON] Rule ${rule.id} skipped - frequency limit (${rule.frequency_limit}) not met`)
-        results.push({
-          rule_id: rule.id,
-          ad_sets_checked: 0,
-          budgets_increased: 0,
-          total_budget_change: 0,
-          errors: 0,
-          skipped_reason: `Frequency limit: ${rule.frequency_limit} (runs every ${frequencyHours}h)`
-        })
-        continue
+      // Check if rule should run based on frequency setting (skip if forced)
+      if (!force) {
+        const frequencyHours = frequencyToHours(rule.frequency_limit || 'every_hour')
+        const shouldRun = await shouldRuleRun(rule.id, rule.clinic_id, frequencyHours)
+        
+        if (!shouldRun) {
+          console.log(`[CRON] Rule ${rule.id} skipped - frequency limit (${rule.frequency_limit}) not met`)
+          results.push({
+            rule_id: rule.id,
+            ad_sets_checked: 0,
+            budgets_increased: 0,
+            total_budget_change: 0,
+            errors: 0,
+            skipped_reason: `Frequency limit: ${rule.frequency_limit} (runs every ${frequencyHours}h)`
+          })
+          continue
+        }
       }
 
       if (!rule.campaign_id) {

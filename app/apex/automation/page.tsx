@@ -191,7 +191,7 @@ export default function ApexAutomationPage() {
   async function runRuleNow() {
     setRunningRule(true)
     try {
-      const response = await fetch('/api/cron/evaluate-rules')
+      const response = await fetch('/api/cron/evaluate-rules?force=true')
       const data = await response.json()
       
       if (response.ok) {
