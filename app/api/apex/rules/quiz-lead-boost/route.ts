@@ -22,7 +22,7 @@ export async function GET() {
       .from('automation_rules')
       .select('*')
       .eq('id', 'quiz-lead-boost')
-      .eq('clinic_id', 'apex')
+      .eq('clinic_id', 'apex-pain-solutions')
       .single()
 
     if (error) {
@@ -52,7 +52,7 @@ export async function PUT(request: NextRequest) {
     
     const ruleData = {
       id: 'quiz-lead-boost',
-      clinic_id: 'apex',
+      clinic_id: 'apex-pain-solutions',
       name: body.name,
       is_active: body.is_active,
       trigger_type: body.trigger_type,
