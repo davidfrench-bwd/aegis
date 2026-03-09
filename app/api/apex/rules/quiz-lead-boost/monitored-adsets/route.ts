@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/app/lib/supabase/server'
 import { getCampaignAdSets } from '@/app/lib/meta/campaign-adsets'
 import { getAdSetLeadMetrics } from '@/app/lib/meta/fetch-leads'
+import { batchWithDelay } from '@/app/lib/meta/rate-limit'
 
 /**
  * GET /api/apex/rules/quiz-lead-boost/monitored-adsets
@@ -45,8 +46,10 @@ export async function GET(request: NextRequest) {
     )
 
     // Enrich with lead metrics using the rule's time window
-    const adSetsWithLeads = await Promise.all(
-      monitoring.ad_sets.map(async (adSet) => {
+    // Use batching with delay to avoid rate limits
+    const adSetsWithLeads = await batchWithDelay(
+      monitoring.ad_sets,
+      async (adSet) => {
         try {
           const metrics = await getAdSetLeadMetrics(adSet.id, rule.time_window_hours)
           return {
@@ -64,7 +67,8 @@ export async function GET(request: NextRequest) {
             lead_count_lifetime: 0
           }
         }
-      })
+      },
+      200 // 200ms delay between requests (max 5 requests/second)
     )
 
     return NextResponse.json({

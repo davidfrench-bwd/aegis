@@ -4,6 +4,8 @@
  * Queries Meta directly for lead count (doesn't rely on webhook ingestion)
  */
 
+import { fetchWithRetry } from './rate-limit'
+
 interface LeadCountResult {
   ad_set_id: string
   lead_count: number
@@ -107,7 +109,7 @@ export async function getAdSetLeadMetrics(adSetId: string, timeWindowHours: numb
     
     console.log(`[META] Fetching lead metrics for ad set ${adSetId}`)
     
-    const todayResponse = await fetch(todayUrl)
+    const todayResponse = await fetchWithRetry(todayUrl)
     
     if (!todayResponse.ok) {
       const error = await todayResponse.json()
