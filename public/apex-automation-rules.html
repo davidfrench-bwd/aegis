@@ -458,8 +458,8 @@
                 const { data: rules, error } = await supabase
                     .from('automation_rules')
                     .select('*')
-                    .eq('clinic_id', 'apex')
-                    .eq('rule_id', 'quiz-lead-boost')
+                    .eq('clinic_id', 'apex-pain-solutions')
+                    .eq('id', 'quiz-lead-boost')
                     .single();
                 
                 if (error) throw error;
@@ -467,22 +467,22 @@
                 // Transform from database format to UI format
                 const config = {
                     rules: [{
-                        id: rules.rule_id,
-                        name: rules.rule_name,
-                        enabled: rules.enabled,
+                        id: rules.id,
+                        name: rules.name,
+                        enabled: rules.is_active,
                         trigger: {
                             type: rules.trigger_type,
-                            threshold: rules.trigger_threshold,
-                            window: rules.trigger_window,
-                            scope: rules.trigger_scope
+                            threshold: rules.threshold,
+                            window: rules.time_window_hours + 'h',
+                            scope: rules.scope
                         },
                         action: {
                             type: rules.action_type,
-                            percentage: rules.action_percentage,
+                            percentage: rules.percentage_change,
                             maxDailyBudget: rules.max_daily_budget,
                             campaignNameFilter: rules.campaign_name_filter,
                             adSetStatusFilter: rules.ad_set_status_filter,
-                            frequency: rules.action_frequency
+                            frequency: rules.frequency_limit
                         }
                     }]
                 };
@@ -555,20 +555,20 @@
                 const { data, error } = await supabase
                     .from('automation_rules')
                     .update({
-                        enabled: enabled,
+                        is_active: enabled,
                         trigger_type: triggerType,
-                        trigger_threshold: triggerThreshold,
-                        trigger_window: triggerWindow,
-                        trigger_scope: triggerScope,
+                        threshold: triggerThreshold,
+                        time_window_hours: parseInt(triggerWindow.replace('h', '')),
+                        scope: triggerScope,
                         action_type: actionType,
-                        action_percentage: actionPercentage,
+                        percentage_change: actionPercentage,
                         max_daily_budget: maxDailyBudget,
                         campaign_name_filter: campaignNameFilter,
                         ad_set_status_filter: adSetStatusFilter,
-                        action_frequency: actionFrequency
+                        frequency_limit: actionFrequency
                     })
-                    .eq('clinic_id', 'apex')
-                    .eq('rule_id', 'quiz-lead-boost')
+                    .eq('clinic_id', 'apex-pain-solutions')
+                    .eq('id', 'quiz-lead-boost')
                     .select();
 
                 if (error) throw error;
