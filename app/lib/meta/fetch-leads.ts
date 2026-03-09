@@ -74,9 +74,20 @@ export async function getAdSetLeadCount(
 }
 
 /**
+ * Convert time window hours to Meta's date_preset parameter
+ */
+function getDatePreset(timeWindowHours: number): string {
+  if (timeWindowHours <= 24) return 'today'
+  if (timeWindowHours <= 168) return 'last_7d'  // 7 days = 168 hours
+  if (timeWindowHours <= 336) return 'last_14d' // 14 days = 336 hours
+  if (timeWindowHours <= 720) return 'last_30d' // 30 days = 720 hours
+  return 'last_90d' // fallback
+}
+
+/**
  * Get lead metrics for an ad set
  */
-export async function getAdSetLeadMetrics(adSetId: string): Promise<{
+export async function getAdSetLeadMetrics(adSetId: string, timeWindowHours: number = 24): Promise<{
   leads_today: number
   leads_lifetime: number
   date_range_start?: string
@@ -88,9 +99,11 @@ export async function getAdSetLeadMetrics(adSetId: string): Promise<{
     throw new Error('META_ACCESS_TOKEN not configured')
   }
 
+  const datePreset = getDatePreset(timeWindowHours)
+
   try {
-    // Fetch TODAY leads
-    const todayUrl = `https://graph.facebook.com/v18.0/${adSetId}/insights?fields=actions,date_start,date_stop&date_preset=today&access_token=${accessToken}`
+    // Fetch leads with the specified date preset
+    const todayUrl = `https://graph.facebook.com/v18.0/${adSetId}/insights?fields=actions,date_start,date_stop&date_preset=${datePreset}&access_token=${accessToken}`
     
     console.log(`[META] Fetching lead metrics for ad set ${adSetId}`)
     

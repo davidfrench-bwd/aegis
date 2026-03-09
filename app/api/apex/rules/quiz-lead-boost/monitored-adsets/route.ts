@@ -44,11 +44,11 @@ export async function GET(request: NextRequest) {
       rule.ad_set_status_filter as 'ACTIVE' | null
     )
 
-    // Enrich with lead metrics
+    // Enrich with lead metrics using the rule's time window
     const adSetsWithLeads = await Promise.all(
       monitoring.ad_sets.map(async (adSet) => {
         try {
-          const metrics = await getAdSetLeadMetrics(adSet.id)
+          const metrics = await getAdSetLeadMetrics(adSet.id, rule.time_window_hours)
           return {
             ...adSet,
             lead_count_today: metrics.leads_today,

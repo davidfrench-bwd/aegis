@@ -267,14 +267,18 @@ export default function ApexAutomationPage() {
             </div>
 
             <div>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Time Window (hours)</label>
-              <input
-                type="number"
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Time Window</label>
+              <select
                 value={rule.time_window_hours}
                 onChange={(e) => setRule({ ...rule, time_window_hours: parseInt(e.target.value) })}
                 style={{ width: '100%', padding: '8px' }}
-              />
-              <small style={{ color: '#666' }}>Check leads in the last X hours</small>
+              >
+                <option value={24}>Today (last 24 hours)</option>
+                <option value={168}>Last 7 Days</option>
+                <option value={336}>Last 14 Days</option>
+                <option value={720}>Last 30 Days</option>
+              </select>
+              <small style={{ color: '#666' }}>Meta date range for lead tracking</small>
             </div>
 
             <div>
