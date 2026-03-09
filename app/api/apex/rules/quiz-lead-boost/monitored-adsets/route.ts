@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       .from('automation_rules')
       .select('*')
       .eq('id', 'quiz-lead-boost')
-      .eq('clinic_id', 'apex')
+      .eq('clinic_id', 'apex-pain-solutions')
       .single()
 
     if (ruleError || !rule) {
