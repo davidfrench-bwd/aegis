@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1773092036255,
+  "lastUpdated": 1773092687078,
   "locationId": "JIISRrxbmMANItOyBU7E",
   "clinicName": "Advanced Shockwave Pain Relief",
   "metrics": [
@@ -11,7 +11,6 @@
       "phoneConsultNoShows": 31,
       "exams": 12,
       "commits": 6,
-      "selfScheduled": 0,
       "adSpend": 3315.02
     },
     {
@@ -22,7 +21,6 @@
       "phoneConsultNoShows": 21,
       "exams": 5,
       "commits": 3,
-      "selfScheduled": 0,
       "adSpend": 2261.99
     },
     {
@@ -33,7 +31,6 @@
       "phoneConsultNoShows": 9,
       "exams": 6,
       "commits": 3,
-      "selfScheduled": 0,
       "adSpend": 1379.51
     },
     {
@@ -44,7 +41,6 @@
       "phoneConsultNoShows": 12,
       "exams": 10,
       "commits": 5,
-      "selfScheduled": 0,
       "adSpend": 4802.42
     },
     {
@@ -55,7 +51,6 @@
       "phoneConsultNoShows": 16,
       "exams": 6,
       "commits": 3,
-      "selfScheduled": 0,
       "adSpend": 8938.93
     },
     {
@@ -66,7 +61,6 @@
       "phoneConsultNoShows": 19,
       "exams": 5,
       "commits": 0,
-      "selfScheduled": 0,
       "adSpend": 7091.53
     },
     {
@@ -77,7 +71,6 @@
       "phoneConsultNoShows": 4,
       "exams": 6,
       "commits": 4,
-      "selfScheduled": 0,
       "adSpend": 3833.16
     },
     {
@@ -88,7 +81,6 @@
       "phoneConsultNoShows": 7,
       "exams": 4,
       "commits": 2,
-      "selfScheduled": 0,
       "adSpend": 3155.41
     },
     {
@@ -99,7 +91,6 @@
       "phoneConsultNoShows": 6,
       "exams": 2,
       "commits": 2,
-      "selfScheduled": 0,
       "adSpend": 1865.85
     },
     {
@@ -110,7 +101,6 @@
       "phoneConsultNoShows": 0,
       "exams": 0,
       "commits": 0,
-      "selfScheduled": 0,
       "adSpend": 155.24
     },
     {
@@ -121,7 +111,6 @@
       "phoneConsultNoShows": 4,
       "exams": 0,
       "commits": 0,
-      "selfScheduled": 0,
       "adSpend": 754.25
     },
     {
@@ -132,7 +121,6 @@
       "phoneConsultNoShows": 3,
       "exams": 2,
       "commits": 2,
-      "selfScheduled": 0,
       "adSpend": 1361.32
     },
     {
@@ -143,7 +131,6 @@
       "phoneConsultNoShows": 12,
       "exams": 1,
       "commits": 1,
-      "selfScheduled": 0,
       "adSpend": 2161.5
     },
     {
@@ -154,7 +141,6 @@
       "phoneConsultNoShows": 14,
       "exams": 3,
       "commits": 1,
-      "selfScheduled": 0,
       "adSpend": 2748.73
     },
     {
@@ -165,7 +151,6 @@
       "phoneConsultNoShows": 2,
       "exams": 1,
       "commits": 0,
-      "selfScheduled": 0,
       "adSpend": 702.73
     }
   ]
