@@ -62,6 +62,7 @@ export default function ApexAutomationPage() {
   const [loading, setLoading] = useState(true)
   const [loadingMonitoring, setLoadingMonitoring] = useState(false)
   const [runningRule, setRunningRule] = useState(false)
+  const [lastRun, setLastRun] = useState<string | null>(null)
   const [supabase, setSupabase] = useState<any>(null)
 
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function ApexAutomationPage() {
     loadRule()
     loadExecutions()
     loadMonitoredAdSets()
+    loadLastRun()
   }
 
   async function loadRule() {
@@ -116,9 +118,29 @@ export default function ApexAutomationPage() {
       if (response.ok) {
         const data = await response.json()
         setExecutions(data)
+        
+        // Set last run time from the most recent execution
+        if (data && data.length > 0) {
+          setLastRun(data[0].created_at)
+        }
       }
     } catch (error) {
       console.error('Failed to load executions:', error)
+    }
+  }
+
+  async function loadLastRun() {
+    try {
+      // Fetch the most recent execution (any status)
+      const response = await fetch('/api/apex/rules/quiz-lead-boost/executions?limit=1&any_status=true')
+      if (response.ok) {
+        const data = await response.json()
+        if (data && data.length > 0) {
+          setLastRun(data[0].created_at)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load last run:', error)
     }
   }
 
@@ -185,8 +207,9 @@ export default function ApexAutomationPage() {
         } else {
           alert('Rule evaluation completed (no active rules)')
         }
-        // Reload executions to show new results
+        // Reload executions and last run time to show new results
         loadExecutions()
+        loadLastRun()
       } else {
         alert(`Error: ${data.error || 'Failed to run rule'}`)
       }
@@ -232,7 +255,21 @@ export default function ApexAutomationPage() {
       {rule && (
         <div style={{ marginBottom: '30px', padding: '20px', background: '#f5f5f5', borderRadius: '8px' }}>
           <div style={{ marginBottom: '15px', padding: '10px', background: '#e3f2fd', borderRadius: '4px', fontSize: '14px' }}>
-            ℹ️ <strong>Automatic Evaluation:</strong> This rule runs every hour via Vercel Cron. It checks all monitored ad sets and increases budgets based on recent lead count.
+            <div style={{ marginBottom: '8px' }}>
+              ℹ️ <strong>Automatic Evaluation:</strong> This rule runs every hour via Vercel Cron. It checks all monitored ad sets and increases budgets based on recent lead count.
+            </div>
+            {lastRun && (
+              <div style={{ fontSize: '13px', color: '#1565c0' }}>
+                🕐 <strong>Last Run:</strong> {new Date(lastRun).toLocaleString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                })}
+              </div>
+            )}
           </div>
           <h2>{rule.name}</h2>
           

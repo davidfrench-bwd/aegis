@@ -14,14 +14,22 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '20')
+    const anyStatus = searchParams.get('any_status') === 'true'
 
     const serviceClient = createServiceClient()
-    const { data, error } = await serviceClient
+    
+    let query = serviceClient
       .from('rule_executions')
       .select('*')
       .eq('rule_id', 'quiz-lead-boost')
       .eq('clinic_id', 'apex-pain-solutions')
-      .eq('triggered', true)  // Only show triggered executions (budget increases)
+    
+    // Only filter by triggered if we're not fetching any status
+    if (!anyStatus) {
+      query = query.eq('triggered', true)  // Only show triggered executions (budget increases)
+    }
+    
+    const { data, error } = await query
       .order('created_at', { ascending: false })
       .limit(limit)
 
