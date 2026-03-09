@@ -293,6 +293,23 @@ export default function ApexAutomationPage() {
             </div>
 
             <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Run Frequency</label>
+              <select
+                value={rule.frequency_limit}
+                onChange={(e) => setRule({ ...rule, frequency_limit: e.target.value })}
+                style={{ width: '100%', padding: '8px' }}
+              >
+                <option value="every_hour">Every Hour</option>
+                <option value="every_2_hours">Every 2 Hours</option>
+                <option value="every_4_hours">Every 4 Hours</option>
+                <option value="every_6_hours">Every 6 Hours</option>
+                <option value="every_12_hours">Every 12 Hours</option>
+                <option value="once_daily">Once Daily (24 hours)</option>
+              </select>
+              <small style={{ color: '#666' }}>How often the automation runs (Vercel cron checks hourly)</small>
+            </div>
+
+            <div>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Campaign ID</label>
               <input
                 type="text"

@@ -22,6 +22,47 @@ interface RuleEvaluationSummary {
   budgets_increased: number
   total_budget_change: number
   errors: number
+  skipped_reason?: string
+}
+
+/**
+ * Convert frequency_limit string to hours
+ */
+function frequencyToHours(frequency: string): number {
+  const map: Record<string, number> = {
+    'every_hour': 1,
+    'every_2_hours': 2,
+    'every_4_hours': 4,
+    'every_6_hours': 6,
+    'every_12_hours': 12,
+    'once_daily': 24
+  }
+  return map[frequency] || 1 // Default to every hour
+}
+
+/**
+ * Check if enough time has passed since last run based on frequency setting
+ */
+async function shouldRuleRun(ruleId: string, clinicId: string, frequencyHours: number): Promise<boolean> {
+  const supabase = createServiceClient()
+  
+  // Get the most recent execution for this rule
+  const { data: lastExec } = await supabase
+    .from('rule_executions')
+    .select('created_at')
+    .eq('rule_id', ruleId)
+    .eq('clinic_id', clinicId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!lastExec) return true // No previous execution, run it
+
+  const lastRunTime = new Date(lastExec.created_at)
+  const now = new Date()
+  const hoursSinceLastRun = (now.getTime() - lastRunTime.getTime()) / (1000 * 60 * 60)
+
+  return hoursSinceLastRun >= frequencyHours
 }
 
 async function logExecution(params: {
@@ -119,6 +160,23 @@ export async function GET(request: NextRequest) {
       let errors = 0
 
       console.log(`[CRON] Evaluating rule: ${rule.name} (${rule.id})`)
+
+      // Check if rule should run based on frequency setting
+      const frequencyHours = frequencyToHours(rule.frequency_limit || 'every_hour')
+      const shouldRun = await shouldRuleRun(rule.id, rule.clinic_id, frequencyHours)
+      
+      if (!shouldRun) {
+        console.log(`[CRON] Rule ${rule.id} skipped - frequency limit (${rule.frequency_limit}) not met`)
+        results.push({
+          rule_id: rule.id,
+          ad_sets_checked: 0,
+          budgets_increased: 0,
+          total_budget_change: 0,
+          errors: 0,
+          skipped_reason: `Frequency limit: ${rule.frequency_limit} (runs every ${frequencyHours}h)`
+        })
+        continue
+      }
 
       if (!rule.campaign_id) {
         console.warn(`[CRON] Rule ${rule.id} has no campaign_id, skipping`)
