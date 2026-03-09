@@ -81,6 +81,15 @@ export default function ApexAutomationPage() {
     }
   }, [supabase])
 
+  // Auto-refresh last run time every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadLastRun()
+    }, 60000) // 60 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
   async function checkUser() {
     if (!supabase) return
     
