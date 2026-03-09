@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1773028875581,
+  "lastUpdated": 1773050451766,
   "healthScore": 100,
   "jobs": [
     {
@@ -7,8 +7,8 @@
       "name": "Heartbeat Checks",
       "enabled": true,
       "schedule": "Every 1 hour",
-      "nextRun": 1773032475581,
-      "lastRun": 1773027075581,
+      "nextRun": 1773054051766,
+      "lastRun": 1773048651766,
       "status": "active",
       "description": "Periodic check-ins: reviews HEARTBEAT.md, monitors emails/calendar, performs proactive maintenance, posts daily briefings at 8 AM",
       "source": "OpenClaw Agent",
@@ -19,22 +19,10 @@
       "name": "dashboard-cache-update-6h",
       "enabled": true,
       "schedule": "0 */6 * * *",
-      "nextRun": 1773028841900,
-      "lastRun": 1773007241910,
+      "nextRun": 1773050441900,
+      "lastRun": 1773028841908,
       "status": "active",
       "description": "Updates dashboard cache with latest cron job status and pushes to GitHub/Vercel (runs every 6 hours)",
-      "source": "OpenClaw Cron",
-      "type": "System Maintenance"
-    },
-    {
-      "id": "a4330a8c-a8a2-4db3-9b18-ccf71b8b204a",
-      "name": "Nightly Memory Consolidation",
-      "enabled": true,
-      "schedule": "0 2 * * *",
-      "nextRun": 1773036000000,
-      "lastRun": 1772953200007,
-      "status": "active",
-      "description": "Reviews daily sessions, updates knowledge graph, consolidates tacit knowledge into memory files",
       "source": "OpenClaw Cron",
       "type": "System Maintenance"
     },
@@ -85,16 +73,24 @@
       "description": "Posts automated daily update summary to Discord #📅-daily-update channel at 8 AM",
       "source": "OpenClaw Cron",
       "type": "Reporting"
+    },
+    {
+      "id": "a4330a8c-a8a2-4db3-9b18-ccf71b8b204a",
+      "name": "Nightly Memory Consolidation",
+      "enabled": true,
+      "schedule": "0 2 * * *",
+      "nextRun": 1773122400000,
+      "lastRun": 1773036000008,
+      "status": "active",
+      "description": "Reviews daily sessions, updates knowledge graph, consolidates tacit knowledge into memory files",
+      "source": "OpenClaw Cron",
+      "type": "System Maintenance"
     }
   ],
   "upcoming": [
     {
       "name": "dashboard-cache-update-6h",
-      "time": 1773028841900
-    },
-    {
-      "name": "Nightly Memory Consolidation",
-      "time": 1773036000000
+      "time": 1773050441900
     },
     {
       "name": "apex-ghl-refresh",
@@ -111,6 +107,10 @@
     {
       "name": "daily-briefing",
       "time": 1773057600000
+    },
+    {
+      "name": "Nightly Memory Consolidation",
+      "time": 1773122400000
     }
   ],
   "stats": {
