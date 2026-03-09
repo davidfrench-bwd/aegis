@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
       .from('rule_executions')
       .select('*')
       .eq('rule_id', 'quiz-lead-boost')
-      .eq('clinic_id', 'apex')
+      .eq('clinic_id', 'apex-pain-solutions')
+      .eq('triggered', true)  // Only show triggered executions (budget increases)
       .order('created_at', { ascending: false })
       .limit(limit)
 

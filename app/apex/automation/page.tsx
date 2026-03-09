@@ -426,7 +426,10 @@ export default function ApexAutomationPage() {
 
       {/* Recent Executions */}
       <div style={{ padding: '20px', background: '#fff', border: '1px solid #ddd', borderRadius: '8px' }}>
-        <h2>Recent Executions</h2>
+        <h2>Recent Budget Increases</h2>
+        <p style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+          Ad sets where the rule triggered and budgets were increased
+        </p>
         
         {executions.length > 0 ? (
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
@@ -458,7 +461,9 @@ export default function ApexAutomationPage() {
             </tbody>
           </table>
         ) : (
-          <p style={{ marginTop: '15px', color: '#666', fontStyle: 'italic' }}>No executions yet</p>
+          <p style={{ marginTop: '15px', color: '#666', fontStyle: 'italic' }}>
+            No budget increases yet. The rule will trigger when an ad set gets {rule?.threshold || 1}+ leads.
+          </p>
         )}
       </div>
     </div>
