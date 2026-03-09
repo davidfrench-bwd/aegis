@@ -69,7 +69,6 @@ async function logExecution(params: {
   ruleId: string
   clinicId: string
   adSetId?: string
-  adSetName?: string
   status: string
   triggered: boolean
   reason: string
@@ -79,11 +78,10 @@ async function logExecution(params: {
 }) {
   const supabase = createServiceClient()
   
-  await supabase.from('rule_executions').insert({
+  const { error } = await supabase.from('rule_executions').insert({
     rule_id: params.ruleId,
     clinic_id: params.clinicId,
     ad_set_id: params.adSetId || null,
-    ad_set_name: params.adSetName || null,
     status: params.status,
     triggered: params.triggered,
     reason: params.reason,
@@ -91,6 +89,10 @@ async function logExecution(params: {
     new_budget: params.newBudget || null,
     meta_response: params.metaResponse || null
   })
+  
+  if (error) {
+    console.error('[CRON] Failed to log execution:', error)
+  }
 }
 
 async function checkRuleLock(ruleId: string, adSetId: string): Promise<boolean> {
@@ -207,7 +209,6 @@ export async function GET(request: NextRequest) {
               ruleId: rule.id,
               clinicId: rule.clinic_id,
               adSetId: adSet.id,
-              adSetName: adSet.name,
               status: 'skipped',
               triggered: false,
               reason: 'Locked (frequency limit active)'
@@ -227,7 +228,6 @@ export async function GET(request: NextRequest) {
               ruleId: rule.id,
               clinicId: rule.clinic_id,
               adSetId: adSet.id,
-              adSetName: adSet.name,
               status: 'skipped',
               triggered: false,
               reason: `Only ${leadsReceived} leads (need ${rule.threshold})`
@@ -249,7 +249,6 @@ export async function GET(request: NextRequest) {
               ruleId: rule.id,
               clinicId: rule.clinic_id,
               adSetId: adSet.id,
-              adSetName: adSet.name,
               status: 'skipped',
               triggered: false,
               reason: `Already at max budget ($${rule.max_daily_budget})`,
@@ -271,7 +270,6 @@ export async function GET(request: NextRequest) {
               ruleId: rule.id,
               clinicId: rule.clinic_id,
               adSetId: adSet.id,
-              adSetName: adSet.name,
               status: 'success',
               triggered: true,
               reason: `${leadsReceived} leads in ${rule.time_window_hours}h → increased ${rule.percentage_change}%`,
@@ -288,7 +286,6 @@ export async function GET(request: NextRequest) {
               ruleId: rule.id,
               clinicId: rule.clinic_id,
               adSetId: adSet.id,
-              adSetName: adSet.name,
               status: 'error',
               triggered: false,
               reason: `Failed to update budget: ${updateResult.message}`,
@@ -303,7 +300,6 @@ export async function GET(request: NextRequest) {
             ruleId: rule.id,
             clinicId: rule.clinic_id,
             adSetId: adSet.id,
-            adSetName: adSet.name,
             status: 'error',
             triggered: false,
             reason: error instanceof Error ? error.message : 'Unknown error'
