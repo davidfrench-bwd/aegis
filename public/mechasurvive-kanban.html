@@ -413,6 +413,18 @@
             try {
                 showSyncIndicator();
 
+                // Get current max sort_order for this status
+                const { data: existingTasks } = await supabaseDB
+                    .from('mechasurvive_tasks')
+                    .select('sort_order')
+                    .eq('status', status)
+                    .order('sort_order', { ascending: false })
+                    .limit(1);
+                
+                const nextSortOrder = existingTasks && existingTasks.length > 0 
+                    ? existingTasks[0].sort_order + 1 
+                    : 1;
+
                 const { data, error } = await supabaseDB
                     .from('mechasurvive_tasks')
                     .insert({
@@ -420,7 +432,7 @@
                         priority: 'medium', // Default to medium
                         week: 'Week 4', // Default to Week 4
                         status,
-                        sort_order: Date.now() // Use timestamp for simple ordering
+                        sort_order: nextSortOrder
                     })
                     .select();
 
