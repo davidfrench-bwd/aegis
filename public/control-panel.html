@@ -352,6 +352,7 @@
                             <div class="rule-name">${r.name}</div>
                             <span class="badge badge-success">Active</span>
                         </div>
+                        ${r.description ? `<div class="rule-details" style="margin-bottom: 8px; color: #e0e6ed;">${r.description}</div>` : ''}
                         <div class="rule-details">
                             ${r.clinic_id} • ${r.trigger_type} (threshold: ${r.threshold}) → ${r.action_type} ${r.percentage_change}%
                         </div>

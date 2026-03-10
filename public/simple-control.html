@@ -61,6 +61,7 @@
                         (${r.is_active ? 'Active' : 'Paused'})
                     </span>
                     <br>
+                    ${r.description ? `<div style="margin: 8px 0; color: #e0e6ed;">${r.description}</div>` : ''}
                     <small>${r.clinic_id} • ${r.trigger_type} (${r.threshold}) → ${r.action_type} ${r.percentage_change}%</small>
                 </div>
             `).join('');

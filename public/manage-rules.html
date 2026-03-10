@@ -391,6 +391,7 @@
                                 <button class="btn btn-delete" onclick="deleteRule('${rule.id}', '${rule.name}')">Delete</button>
                             </div>
                         </div>
+                        ${rule.description ? `<div style="color: #e0e6ed; margin-bottom: 10px; font-size: 14px;">${rule.description}</div>` : ''}
                         <div class="rule-details">
                             Trigger: ${rule.trigger_type} (threshold: ${rule.threshold}) • 
                             Action: ${rule.action_type} (${rule.percentage_change || 0}%) • 
