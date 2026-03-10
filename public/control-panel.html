@@ -203,6 +203,7 @@
         <header>
             <h1>🛡️ Aegis Control Panel</h1>
             <div class="subtitle">NPE Automation Dashboard • Last updated: <span id="lastUpdate">Loading...</span></div>
+            <div class="nav" style="margin-top: 10px;"><a href="/" style="color: #3b82f6; text-decoration: none;">← Back to Aegis Home</a></div>
         </header>
         
         <div id="errorContainer"></div>
@@ -257,7 +258,7 @@
     <script>
         // Supabase config (will be loaded from .env.local in production)
         const SUPABASE_URL = 'https://fbmsmqukiogxeclmgvim.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZibXNtcXVraW9neGVjbG1ndmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NTY4MTMsImV4cCI6MjAyNTIzMjgxM30.Vl5KqPqMZc5tqmKZu4cXZqJgYx5YnLRqBHgJmYqKZqM';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZibXNtcXVraW9neGVjbG1ndmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NjQyODAsImV4cCI6MjA4ODE0MDI4MH0.TUmewpYEt_oYsamQpGijPYVSyk_i3gg5uS8LBUwB-0s';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
