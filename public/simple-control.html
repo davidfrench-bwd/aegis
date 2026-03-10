@@ -34,14 +34,14 @@
     <div id="rules" class="rules"></div>
     
     <script>
-        const supabase = window.supabase.createClient(
+        const sbClient = window.supabase.createClient(
             'https://fbmsmqukiogxeclmgvim.supabase.co',
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZibXNtcXVraW9neGVjbG1ndmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NjQyODAsImV4cCI6MjA4ODE0MDI4MH0.TUmewpYEt_oYsamQpGijPYVSyk_i3gg5uS8LBUwB-0s'
         );
         
         async function loadRules() {
             console.log('Loading rules...');
-            const { data, error } = await supabase
+            const { data, error } = await sbClient
                 .from('automation_rules')
                 .select('*')
                 .order('clinic_id');
