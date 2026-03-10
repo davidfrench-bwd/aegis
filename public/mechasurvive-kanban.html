@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MechaSurvive — Task Board</title>
+    <title>MechaSurvive — Task Board (Real-time)</title>
     <link rel="stylesheet" href="/dashboard/style.css">
     <style>
         .kanban-board {
@@ -57,6 +57,7 @@
             margin-bottom: 10px;
             cursor: move;
             transition: all 0.2s;
+            position: relative;
         }
 
         .task-card:hover {
@@ -97,6 +98,25 @@
             border-radius: 4px;
         }
 
+        .task-delete {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .task-card:hover .task-delete {
+            opacity: 1;
+        }
+
         .add-task-btn {
             width: 100%;
             padding: 10px;
@@ -115,6 +135,23 @@
             color: #00d9ff;
         }
 
+        .sync-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .sync-indicator.syncing {
+            display: block;
+            background: #f59e0b;
+        }
+
         @media (max-width: 768px) {
             .kanban-board {
                 grid-template-columns: 1fr;
@@ -125,10 +162,12 @@
     <script src="/js/supabase-client.js"></script>
 </head>
 <body>
+    <div class="sync-indicator" id="sync-indicator">🔄 Syncing...</div>
+    
     <div class="container">
         <header>
             <h1>🤖 MECHASURVIVE</h1>
-            <p class="subtitle">Task Board — Week 4 Sprint</p>
+            <p class="subtitle">Task Board — Real-time Sync ⚡</p>
             <nav class="main-nav">
                 <a href="/mechasurvive.html" class="nav-link">← Back to Mission Control</a>
                 <a href="/" class="nav-link">🛡️ Aegis Home</a>
@@ -139,103 +178,43 @@
             <!-- TO DO Column -->
             <div class="kanban-column todo">
                 <h3>📋 TO DO</h3>
-                <div id="todo-tasks">
-                    <div class="task-card high-priority" draggable="true">
-                        <div class="task-title">🚨 Request Steam Playtest Access</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: HIGH</span>
-                        </div>
-                    </div>
-
-                    <div class="task-card high-priority" draggable="true">
-                        <div class="task-title">Implement 2 Arsenal Slots (LB/RB, Q/F)</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: HIGH</span>
-                        </div>
-                    </div>
-
-                    <div class="task-card high-priority" draggable="true">
-                        <div class="task-title">Build Gate Unlock System</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: HIGH</span>
-                        </div>
-                    </div>
-
-                    <div class="task-card high-priority" draggable="true">
-                        <div class="task-title">Death Screen + Restart Flow</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: HIGH</span>
-                        </div>
-                    </div>
-
-                    <div class="task-card medium-priority" draggable="true">
-                        <div class="task-title">Remove Drop Pod System</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: MED</span>
-                        </div>
-                    </div>
-
-                    <div class="task-card medium-priority" draggable="true">
-                        <div class="task-title">Start Room 2 Layout (with Level Designer)</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: MED</span>
-                        </div>
-                    </div>
-
-                    <div class="task-card low-priority" draggable="true">
-                        <div class="task-title">Research Steam Capsule Art (Top Roguelites)</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: LOW</span>
-                        </div>
-                    </div>
-
-                    <div class="task-card low-priority" draggable="true">
-                        <div class="task-title">Block Out Room 2-5 Layouts (Rough Sketches)</div>
-                        <div class="task-meta">
-                            <span class="task-week">Week 4</span>
-                            <span>Priority: LOW</span>
-                        </div>
-                    </div>
-                </div>
+                <div id="todo-tasks"></div>
                 <button class="add-task-btn" data-column="todo">+ Add Task</button>
             </div>
 
             <!-- IN PROGRESS Column -->
             <div class="kanban-column inprogress">
                 <h3>⚡ IN PROGRESS</h3>
-                <div id="inprogress-tasks">
-                    <!-- Tasks will be dragged here -->
-                </div>
+                <div id="inprogress-tasks"></div>
                 <button class="add-task-btn" data-column="inprogress">+ Add Task</button>
             </div>
 
             <!-- DONE Column -->
             <div class="kanban-column done">
                 <h3>✅ DONE</h3>
-                <div id="done-tasks">
-                    <!-- Completed tasks will be dragged here -->
-                </div>
+                <div id="done-tasks"></div>
                 <button class="add-task-btn" data-column="done">+ Add Task</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Drag and drop functionality
         let draggedElement = null;
+        let draggedTaskId = null;
+        let supabase = null;
+        let realtimeChannel = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTasks();
-            initDragAndDrop();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize Supabase
+            supabase = window.supabase;
             
-            // Attach event listeners to add task buttons
+            // Load initial tasks
+            await loadAllTasks();
+            
+            // Setup real-time subscription
+            setupRealtimeSync();
+            
+            // Attach event listeners
             const addTaskButtons = document.querySelectorAll('.add-task-btn');
             addTaskButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -243,36 +222,125 @@
                     addTask(column);
                 });
             });
+
+            // Setup drag and drop
+            initDragAndDrop();
         });
 
+        async function loadAllTasks() {
+            try {
+                const { data: tasks, error } = await supabase
+                    .from('mechasurvive_tasks')
+                    .select('*')
+                    .order('sort_order', { ascending: true });
+
+                if (error) throw error;
+
+                // Clear all columns
+                ['todo', 'inprogress', 'done'].forEach(status => {
+                    document.getElementById(`${status}-tasks`).innerHTML = '';
+                });
+
+                // Render tasks
+                tasks.forEach(task => renderTask(task));
+                
+                // Re-init drag and drop
+                initDragAndDrop();
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                alert('Failed to load tasks from database');
+            }
+        }
+
+        function renderTask(task) {
+            const container = document.getElementById(`${task.status}-tasks`);
+            
+            // Check if task already exists
+            let taskCard = container.querySelector(`[data-task-id="${task.id}"]`);
+            
+            if (!taskCard) {
+                // Create new task card
+                taskCard = document.createElement('div');
+                taskCard.className = `task-card ${task.priority}-priority`;
+                taskCard.draggable = true;
+                taskCard.setAttribute('data-task-id', task.id);
+            }
+
+            taskCard.innerHTML = `
+                <button class="task-delete" onclick="deleteTask('${task.id}')">✕</button>
+                <div class="task-title">${escapeHtml(task.title)}</div>
+                <div class="task-meta">
+                    <span class="task-week">${escapeHtml(task.week)}</span>
+                    <span>Priority: ${task.priority.toUpperCase()}</span>
+                </div>
+            `;
+
+            container.appendChild(taskCard);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function setupRealtimeSync() {
+            // Subscribe to INSERT, UPDATE, DELETE events
+            realtimeChannel = supabase
+                .channel('mechasurvive-tasks-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'mechasurvive_tasks'
+                    },
+                    (payload) => {
+                        console.log('Real-time update:', payload);
+                        handleRealtimeUpdate(payload);
+                    }
+                )
+                .subscribe();
+        }
+
+        function handleRealtimeUpdate(payload) {
+            const { eventType, new: newRecord, old: oldRecord } = payload;
+
+            if (eventType === 'INSERT') {
+                renderTask(newRecord);
+                initDragAndDrop();
+            } else if (eventType === 'UPDATE') {
+                // Remove old card
+                const oldCard = document.querySelector(`[data-task-id="${newRecord.id}"]`);
+                if (oldCard) oldCard.remove();
+                
+                // Render new
+                renderTask(newRecord);
+                initDragAndDrop();
+            } else if (eventType === 'DELETE') {
+                const card = document.querySelector(`[data-task-id="${oldRecord.id}"]`);
+                if (card) card.remove();
+            }
+        }
+
         function initDragAndDrop() {
-            // Remove old listeners and re-attach to all current tasks
             const tasks = document.querySelectorAll('.task-card');
             const columns = document.querySelectorAll('.kanban-column > div[id$="-tasks"]');
 
-            // Use event delegation - attach to container, not individual cards
             columns.forEach(column => {
-                // Remove old listeners
                 column.removeEventListener('dragover', handleDragOver);
                 column.removeEventListener('dragleave', handleDragLeave);
                 column.removeEventListener('drop', handleDrop);
                 
-                // Add fresh listeners
                 column.addEventListener('dragover', handleDragOver);
                 column.addEventListener('dragleave', handleDragLeave);
                 column.addEventListener('drop', handleDrop);
-                
-                // Make sure the drop zone is ready
-                column.style.minHeight = '50px';
             });
 
-            // For task cards, we need to ensure draggable is set
             tasks.forEach(task => {
                 task.draggable = true;
-                // Remove old listeners to avoid duplicates
                 task.removeEventListener('dragstart', handleDragStart);
                 task.removeEventListener('dragend', handleDragEnd);
-                // Add fresh listeners
                 task.addEventListener('dragstart', handleDragStart);
                 task.addEventListener('dragend', handleDragEnd);
             });
@@ -280,98 +348,133 @@
 
         function handleDragStart(e) {
             draggedElement = this;
+            draggedTaskId = this.getAttribute('data-task-id');
             this.style.opacity = '0.5';
         }
 
-        function handleDragEnd(e) {
+        async function handleDragEnd(e) {
             this.style.opacity = '1';
-            saveTasks();
         }
 
         function handleDragOver(e) {
             e.preventDefault();
             e.stopPropagation();
-            // Add visual feedback
             this.style.background = 'rgba(0, 217, 255, 0.1)';
             return false;
         }
 
         function handleDragLeave(e) {
-            // Remove visual feedback
             this.style.background = '';
         }
 
-        function handleDrop(e) {
+        async function handleDrop(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            // Remove visual feedback
             this.style.background = '';
             
-            if (draggedElement && draggedElement !== this) {
-                // Append to the drop zone (the task container)
-                this.appendChild(draggedElement);
-                saveTasks();
+            if (!draggedElement || !draggedTaskId) return;
+
+            // Determine new status from drop zone id
+            const newStatus = this.id.replace('-tasks', '');
+            
+            // Append to drop zone
+            this.appendChild(draggedElement);
+
+            // Update in Supabase
+            try {
+                showSyncIndicator();
+                
+                const { error } = await supabase
+                    .from('mechasurvive_tasks')
+                    .update({ status: newStatus })
+                    .eq('id', draggedTaskId);
+
+                if (error) throw error;
+
+                hideSyncIndicator();
+            } catch (error) {
+                console.error('Error updating task:', error);
+                alert('Failed to update task status');
+                // Reload to reset state
+                await loadAllTasks();
             }
-            return false;
+
+            draggedElement = null;
+            draggedTaskId = null;
         }
 
-        function addTask(column) {
+        async function addTask(status) {
             const title = prompt('Task title:');
             if (!title) return;
 
             const priority = prompt('Priority (high/medium/low):', 'medium');
-            const week = prompt('Week:', 'Week 4');
-
-            const taskCard = document.createElement('div');
-            taskCard.className = `task-card ${priority}-priority`;
-            taskCard.draggable = true;
-            taskCard.innerHTML = `
-                <div class="task-title">${title}</div>
-                <div class="task-meta">
-                    <span class="task-week">${week}</span>
-                    <span>Priority: ${priority.toUpperCase()}</span>
-                </div>
-            `;
-
-            taskCard.addEventListener('dragstart', handleDragStart);
-            taskCard.addEventListener('dragend', handleDragEnd);
-
-            document.getElementById(`${column}-tasks`).appendChild(taskCard);
-            saveTasks();
-        }
-
-        function saveTasks() {
-            const state = {
-                todo: Array.from(document.getElementById('todo-tasks').children).map(el => el.outerHTML),
-                inprogress: Array.from(document.getElementById('inprogress-tasks').children).map(el => el.outerHTML),
-                done: Array.from(document.getElementById('done-tasks').children).map(el => el.outerHTML)
-            };
-            localStorage.setItem('mechasurvive-tasks', JSON.stringify(state));
-        }
-
-        function loadTasks() {
-            const saved = localStorage.getItem('mechasurvive-tasks');
-            if (!saved) {
-                // First time - attach listeners to initial tasks
-                initDragAndDrop();
+            if (!['high', 'medium', 'low'].includes(priority)) {
+                alert('Invalid priority. Use: high, medium, or low');
                 return;
             }
 
-            const state = JSON.parse(saved);
-            
-            if (state.todo && state.todo.length > 0) {
-                document.getElementById('todo-tasks').innerHTML = state.todo.join('');
-            }
-            if (state.inprogress && state.inprogress.length > 0) {
-                document.getElementById('inprogress-tasks').innerHTML = state.inprogress.join('');
-            }
-            if (state.done && state.done.length > 0) {
-                document.getElementById('done-tasks').innerHTML = state.done.join('');
-            }
+            const week = prompt('Week:', 'Week 4');
 
-            // Re-attach drag listeners after loading from localStorage
-            setTimeout(() => initDragAndDrop(), 100);
+            try {
+                showSyncIndicator();
+
+                const { error } = await supabase
+                    .from('mechasurvive_tasks')
+                    .insert([
+                        {
+                            title,
+                            priority,
+                            week,
+                            status,
+                            sort_order: Date.now() // Use timestamp for simple ordering
+                        }
+                    ]);
+
+                if (error) throw error;
+
+                hideSyncIndicator();
+            } catch (error) {
+                console.error('Error adding task:', error);
+                alert('Failed to add task');
+            }
+        }
+
+        async function deleteTask(taskId) {
+            if (!confirm('Delete this task?')) return;
+
+            try {
+                showSyncIndicator();
+
+                const { error } = await supabase
+                    .from('mechasurvive_tasks')
+                    .delete()
+                    .eq('id', taskId);
+
+                if (error) throw error;
+
+                hideSyncIndicator();
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                alert('Failed to delete task');
+            }
+        }
+
+        function showSyncIndicator() {
+            const indicator = document.getElementById('sync-indicator');
+            indicator.classList.add('syncing');
+            indicator.textContent = '🔄 Syncing...';
+        }
+
+        function hideSyncIndicator() {
+            const indicator = document.getElementById('sync-indicator');
+            setTimeout(() => {
+                indicator.textContent = '✅ Synced';
+                indicator.style.background = '#10b981';
+                setTimeout(() => {
+                    indicator.classList.remove('syncing');
+                }, 1000);
+            }, 300);
         }
     </script>
     <script>
