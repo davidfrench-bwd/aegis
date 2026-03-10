@@ -206,7 +206,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize Supabase
-            supabase = window.supabase;
+            supabase = window.supabaseClient;
             
             // Load initial tasks
             await loadAllTasks();
