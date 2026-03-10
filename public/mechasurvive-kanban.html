@@ -413,7 +413,7 @@
             try {
                 showSyncIndicator();
 
-                const { error } = await supabaseDB
+                const { data, error } = await supabaseDB
                     .from('mechasurvive_tasks')
                     .insert([
                         {
@@ -425,12 +425,16 @@
                         }
                     ]);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
 
+                console.log('Task added successfully:', data);
                 hideSyncIndicator();
             } catch (error) {
                 console.error('Error adding task:', error);
-                alert('Failed to add task');
+                alert('Failed to add task: ' + error.message);
             }
         }
 
