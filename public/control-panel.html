@@ -260,7 +260,7 @@
         const SUPABASE_URL = 'https://fbmsmqukiogxeclmgvim.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZibXNtcXVraW9neGVjbG1ndmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NjQyODAsImV4cCI6MjA4ODE0MDI4MH0.TUmewpYEt_oYsamQpGijPYVSyk_i3gg5uS8LBUwB-0s';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         async function loadData() {
             const now = new Date().toLocaleString();
@@ -285,7 +285,7 @@
         }
         
         async function loadSystemHealth() {
-            const { data: states, error } = await supabase
+            const { data: states, error } = await sbClient
                 .from('automation_state')
                 .select('*');
             
@@ -336,7 +336,7 @@
         }
         
         async function loadActiveAutomations() {
-            const { data: rules, error } = await supabase
+            const { data: rules, error } = await sbClient
                 .from('automation_rules')
                 .select('*')
                 .eq('is_active', true);
@@ -365,7 +365,7 @@
         async function loadRecentActivity() {
             const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
             
-            const { data: logs, error } = await supabase
+            const { data: logs, error } = await sbClient
                 .from('automation_logs')
                 .select('*')
                 .gte('run_at', oneDayAgo)
