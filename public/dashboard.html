@@ -4,114 +4,248 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🛡️ Aegis Dashboard</title>
-    <link rel="stylesheet" href="/dashboard/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/js/supabase-client.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e6ed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+        
+        .subtitle {
+            color: #8b92a7;
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .pillar-card {
+            background: linear-gradient(135deg, #131937 0%, #1a2147 100%);
+            border: 2px solid #1e2749;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .pillar-card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+        }
+        
+        .pillar-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .pillar-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .pillar-description {
+            color: #8b92a7;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .pillar-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #1e2749;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #8b92a7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .utilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .utility-link {
+            background: #131937;
+            border: 1px solid #1e2749;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #e0e6ed;
+            transition: all 0.2s ease;
+            display: block;
+        }
+        
+        .utility-link:hover {
+            border-color: #3b82f6;
+            background: #1a2147;
+        }
+        
+        .utility-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .utility-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid #1e2749;
+            color: #8b92a7;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🛡️ AEGIS</h1>
-            <p class="subtitle">Strategic Automation Command Center</p>
-            <nav class="main-nav">
-                <a href="/npe.html" class="nav-link">🏥 Neuropathy Profit Engine</a>
-                <a href="/mechasurvive.html" class="nav-link">🤖 MechaSurvive HQ</a>
-            </nav>
-            <div class="last-update">
-                <span id="lastUpdate">Initializing...</span>
-                <button id="refreshBtn" class="refresh-btn">🔄 Refresh Data</button>
-            </div>
+            <p class="subtitle">Strategic Life Operator</p>
         </header>
-
-        <!-- Health Score -->
-        <div class="health-card">
-            <div class="health-score">
-                <div class="score-circle">
-                    <span id="healthScore">--</span>%
+        
+        <!-- Two Pillars -->
+        <div class="pillars">
+            <a href="/clinic-cards.html" class="pillar-card">
+                <span class="pillar-icon">🏥</span>
+                <div class="pillar-title">Neuropathy Profit Engine</div>
+                <p class="pillar-description">
+                    Cash flow machine. Intentionally small but powerful. Systems that work without you.
+                </p>
+                <div class="pillar-stats">
+                    <div class="stat">
+                        <div class="stat-value">4</div>
+                        <div class="stat-label">Clinics</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">✅</div>
+                        <div class="stat-label">Automated</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">$$$</div>
+                        <div class="stat-label">Revenue</div>
+                    </div>
                 </div>
-                <div class="health-label">System Health</div>
-            </div>
-            <div class="health-stats">
-                <div class="stat">
-                    <div class="stat-value" id="totalJobs">--</div>
-                    <div class="stat-label">Total Jobs</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="activeJobs">--</div>
-                    <div class="stat-label">Active</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="successRate">--</div>
-                    <div class="stat-label">Success Rate</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Upcoming Schedule -->
-        <div class="card">
-            <h2>📅 Next 24 Hours</h2>
-            <div id="upcoming" class="upcoming-list">
-                <div class="loading">Loading upcoming tasks...</div>
-            </div>
-        </div>
-
-        <!-- Active Jobs -->
-        <div class="card">
-            <h2>🤖 Active Automations</h2>
-            <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 20px;">
-                Frequency • Last Run • Next Run • Estimated Cost
-            </p>
-            <div id="jobs" class="jobs-list">
-                <div class="loading">Loading automation tasks...</div>
-            </div>
-        </div>
-
-        <!-- Last 7 Days Stats -->
-        <div class="card">
-            <h2>📊 Performance (Last 7 Days)</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalRuns">--</div>
-                    <div class="stat-label">Total Runs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="successful">--</div>
-                    <div class="stat-label">Successful</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="failed">--</div>
-                    <div class="stat-label">Failed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="avgRuntime">--</div>
-                    <div class="stat-label">Avg Runtime</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="/dashboard/app.js"></script>
-    <script>
-        // Require authentication (admin only for main dashboard)
-        (async () => {
-            const auth = await requireAuth('admin');
-            if (!auth) return;
+            </a>
             
-            // Add logout button
-            const nav = document.querySelector('.main-nav');
-            const logoutBtn = document.createElement('button');
-            logoutBtn.textContent = '🚪 Logout';
-            logoutBtn.className = 'nav-link';
-            logoutBtn.style.background = '#ef4444';
-            logoutBtn.style.border = 'none';
-            logoutBtn.style.cursor = 'pointer';
-            logoutBtn.onclick = async () => {
-                await signOut();
-                window.location.href = '/login.html';
-            };
-            nav.appendChild(logoutBtn);
-        })();
+            <a href="/mechasurvive.html" class="pillar-card">
+                <span class="pillar-icon">🤖</span>
+                <div class="pillar-title">MechaSurvive</div>
+                <p class="pillar-description">
+                    Creative fulfillment + asymmetric upside. Fun is fuel, not a reward.
+                </p>
+                <div class="pillar-stats">
+                    <div class="stat">
+                        <div class="stat-value">🎮</div>
+                        <div class="stat-label">Game Dev</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">🚀</div>
+                        <div class="stat-label">Upside</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">❤️</div>
+                        <div class="stat-label">Passion</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Utilities -->
+        <div class="utilities">
+            <a href="/control-panel.html" class="utility-link">
+                <span class="utility-icon">⚙️</span>
+                <div class="utility-title">Control Panel</div>
+            </a>
+            
+            <a href="/analytics.html" class="utility-link">
+                <span class="utility-icon">📊</span>
+                <div class="utility-title">Analytics</div>
+            </a>
+            
+            <a href="/agent-chat.html" class="utility-link">
+                <span class="utility-icon">💬</span>
+                <div class="utility-title">Agent Chat</div>
+            </a>
+            
+            <a href="https://github.com/davidfrench-bwd/aegis" target="_blank" class="utility-link">
+                <span class="utility-icon">📁</span>
+                <div class="utility-title">GitHub</div>
+            </a>
+        </div>
+        
+        <footer>
+            Aegis Dashboard • Built with OpenClaw • Last updated: <span id="timestamp"></span>
+        </footer>
+    </div>
+    
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
     </script>
 </body>
 </html>
-<!-- Updated: Fri Mar  6 16:46:31 EST 2026 -->
