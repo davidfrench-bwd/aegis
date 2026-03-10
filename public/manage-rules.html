@@ -339,6 +339,23 @@
         
         const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
+        function formatLastRun(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays}d ago`;
+            
+            return date.toLocaleDateString();
+        }
+        
         async function loadRules() {
             const { data: rules, error } = await sbClient
                 .from('automation_rules')
@@ -349,6 +366,27 @@
                 showAlert('Failed to load rules: ' + error.message, 'error');
                 return;
             }
+            
+            // Fetch last run times from automation_logs
+            const { data: logs } = await sbClient
+                .from('automation_logs')
+                .select('rule_id, run_at')
+                .order('run_at', { ascending: false });
+            
+            // Map rule_id to last run time
+            const lastRunMap = {};
+            if (logs) {
+                logs.forEach(log => {
+                    if (!lastRunMap[log.rule_id]) {
+                        lastRunMap[log.rule_id] = log.run_at;
+                    }
+                });
+            }
+            
+            // Add last run to each rule
+            rules.forEach(rule => {
+                rule.last_run = lastRunMap[rule.id];
+            });
             
             // Group by clinic
             const clinicMap = {};
@@ -396,6 +434,9 @@
                             Trigger: ${rule.trigger_type} (threshold: ${rule.threshold}) • 
                             Action: ${rule.action_type} (${rule.percentage_change || 0}%) • 
                             Max budget: $${(rule.max_daily_budget / 100).toFixed(2)}/day
+                        </div>
+                        <div class="rule-details" style="margin-top: 8px; color: #8b92a7;">
+                            Last run: ${rule.last_run ? formatLastRun(rule.last_run) : 'Never'}
                         </div>
                     `;
                     section.appendChild(card);
