@@ -216,8 +216,10 @@
             
             // Attach event listeners
             const addTaskButtons = document.querySelectorAll('.add-task-btn');
+            console.log('Found', addTaskButtons.length, 'add task buttons');
             addTaskButtons.forEach(button => {
                 button.addEventListener('click', function() {
+                    console.log('Add task button clicked, column:', this.getAttribute('data-column'));
                     const column = this.getAttribute('data-column');
                     addTask(column);
                 });
@@ -405,6 +407,8 @@
         }
 
         async function addTask(status) {
+            console.log('addTask called with status:', status);
+            console.log('supabase client:', supabase);
             const title = prompt('Task title:');
             if (!title) return;
 
