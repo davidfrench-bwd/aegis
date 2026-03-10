@@ -1,5 +1,5 @@
 {
-  "lastUpdated": 1773050451766,
+  "lastUpdated": 1773160551493,
   "healthScore": 100,
   "jobs": [
     {
@@ -7,22 +7,45 @@
       "name": "Heartbeat Checks",
       "enabled": true,
       "schedule": "Every 1 hour",
-      "nextRun": 1773054051766,
-      "lastRun": 1773048651766,
+      "nextRun": 1773164151493,
+      "lastRun": 1773158751493,
       "status": "active",
       "description": "Periodic check-ins: reviews HEARTBEAT.md, monitors emails/calendar, performs proactive maintenance, posts daily briefings at 8 AM",
       "source": "OpenClaw Agent",
       "type": "Monitoring"
     },
     {
-      "id": "c3fe8040-f58e-4388-92dc-b2336a0c6178",
-      "name": "dashboard-cache-update-6h",
+      "id": "8d42088c-4e3e-4a5a-8c25-c268aa5d36b9",
+      "name": "NPE Lightweight Lead Check",
+      "enabled": true,
+      "schedule": "0 */3 * * *",
+      "nextRun": 1773169218364,
+      "lastRun": 1773158418370,
+      "status": "active",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
+      "id": "85e84bd2-763e-4343-874b-dc570e1397fb",
+      "name": "Dashboard Cache Update",
       "enabled": true,
       "schedule": "0 */6 * * *",
-      "nextRun": 1773050441900,
-      "lastRun": 1773028841908,
+      "nextRun": 1773180139781,
       "status": "active",
-      "description": "Updates dashboard cache with latest cron job status and pushes to GitHub/Vercel (runs every 6 hours)",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
+      "id": "a4330a8c-a8a2-4db3-9b18-ccf71b8b204a",
+      "name": "Nightly Memory Consolidation",
+      "enabled": true,
+      "schedule": "0 2 * * *",
+      "nextRun": 1773208800000,
+      "lastRun": 1773122400009,
+      "status": "active",
+      "description": "Reviews daily sessions, updates knowledge graph, consolidates tacit knowledge into memory files",
       "source": "OpenClaw Cron",
       "type": "System Maintenance"
     },
@@ -31,8 +54,8 @@
       "name": "apex-ghl-refresh",
       "enabled": true,
       "schedule": "30 7 * * *",
-      "nextRun": 1773055800000,
-      "lastRun": 1772969400009,
+      "nextRun": 1773228600000,
+      "lastRun": 1773142200008,
       "status": "active",
       "description": "Fetches GoHighLevel contacts, opportunities, and pipeline data for Apex Pain Solutions clinic dashboard",
       "source": "OpenClaw Cron",
@@ -43,8 +66,20 @@
       "name": "natural-foundations-ghl-refresh",
       "enabled": true,
       "schedule": "31 7 * * *",
-      "nextRun": 1773055860000,
-      "lastRun": 1772969493759,
+      "nextRun": 1773228660000,
+      "lastRun": 1773142319622,
+      "status": "active",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
+      "id": "a0d2cfdf-96ab-449a-bade-e56f39e5980d",
+      "name": "advanced-shockwave-ghl-refresh",
+      "enabled": true,
+      "schedule": "31 7 * * *",
+      "nextRun": 1773228660000,
+      "lastRun": 1773142372570,
       "status": "active",
       "description": "Automated task",
       "source": "OpenClaw Cron",
@@ -55,8 +90,19 @@
       "name": "thrive-restoration-ghl-refresh",
       "enabled": true,
       "schedule": "32 7 * * *",
-      "nextRun": 1773055920000,
-      "lastRun": 1772969548682,
+      "nextRun": 1773228720000,
+      "lastRun": 1773142413500,
+      "status": "active",
+      "description": "Automated task",
+      "source": "OpenClaw Cron",
+      "type": "Unknown"
+    },
+    {
+      "id": "2359d1c9-644c-4b69-ad50-7f0c342e860f",
+      "name": "daily-health-check",
+      "enabled": true,
+      "schedule": "0 8 * * *",
+      "nextRun": 1773230400000,
       "status": "active",
       "description": "Automated task",
       "source": "OpenClaw Cron",
@@ -67,50 +113,65 @@
       "name": "daily-briefing",
       "enabled": true,
       "schedule": "0 8 * * *",
-      "nextRun": 1773057600000,
-      "lastRun": 1772971200007,
+      "nextRun": 1773230400000,
+      "lastRun": 1773144000006,
       "status": "active",
       "description": "Posts automated daily update summary to Discord #📅-daily-update channel at 8 AM",
       "source": "OpenClaw Cron",
       "type": "Reporting"
     },
     {
-      "id": "a4330a8c-a8a2-4db3-9b18-ccf71b8b204a",
-      "name": "Nightly Memory Consolidation",
+      "id": "3f9db7cf-45c8-4166-81ce-9b9e124f4091",
+      "name": "npe-automation-daily",
       "enabled": true,
-      "schedule": "0 2 * * *",
-      "nextRun": 1773122400000,
-      "lastRun": 1773036000008,
+      "schedule": "0 9 * * *",
+      "nextRun": 1773234000000,
       "status": "active",
-      "description": "Reviews daily sessions, updates knowledge graph, consolidates tacit knowledge into memory files",
+      "description": "Automated task",
       "source": "OpenClaw Cron",
-      "type": "System Maintenance"
+      "type": "Unknown"
     }
   ],
   "upcoming": [
     {
-      "name": "dashboard-cache-update-6h",
-      "time": 1773050441900
+      "name": "NPE Lightweight Lead Check",
+      "time": 1773169218364
     },
     {
-      "name": "apex-ghl-refresh",
-      "time": 1773055800000
-    },
-    {
-      "name": "natural-foundations-ghl-refresh",
-      "time": 1773055860000
-    },
-    {
-      "name": "thrive-restoration-ghl-refresh",
-      "time": 1773055920000
-    },
-    {
-      "name": "daily-briefing",
-      "time": 1773057600000
+      "name": "Dashboard Cache Update",
+      "time": 1773180139781
     },
     {
       "name": "Nightly Memory Consolidation",
-      "time": 1773122400000
+      "time": 1773208800000
+    },
+    {
+      "name": "apex-ghl-refresh",
+      "time": 1773228600000
+    },
+    {
+      "name": "natural-foundations-ghl-refresh",
+      "time": 1773228660000
+    },
+    {
+      "name": "advanced-shockwave-ghl-refresh",
+      "time": 1773228660000
+    },
+    {
+      "name": "thrive-restoration-ghl-refresh",
+      "time": 1773228720000
+    },
+    {
+      "name": "daily-health-check",
+      "time": 1773230400000
+    },
+    {
+      "name": "daily-briefing",
+      "time": 1773230400000
+    },
+    {
+      "name": "npe-automation-daily",
+      "time": 1773234000000
     }
   ],
   "stats": {
