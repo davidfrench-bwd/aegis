@@ -201,12 +201,12 @@
     <script>
         let draggedElement = null;
         let draggedTaskId = null;
-        let supabase = null;
+        let supabaseDB = null;
         let realtimeChannel = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize Supabase
-            supabase = window.supabaseClient;
+            supabaseDB = window.supabaseClient;
             
             // Load initial tasks
             await loadAllTasks();
@@ -231,7 +231,7 @@
 
         async function loadAllTasks() {
             try {
-                const { data: tasks, error } = await supabase
+                const { data: tasks, error } = await supabaseDB
                     .from('mechasurvive_tasks')
                     .select('*')
                     .order('sort_order', { ascending: true });
@@ -288,7 +288,7 @@
 
         function setupRealtimeSync() {
             // Subscribe to INSERT, UPDATE, DELETE events
-            realtimeChannel = supabase
+            realtimeChannel = supabaseDB
                 .channel('mechasurvive-tasks-changes')
                 .on(
                     'postgres_changes',
@@ -387,7 +387,7 @@
             try {
                 showSyncIndicator();
                 
-                const { error } = await supabase
+                const { error } = await supabaseDB
                     .from('mechasurvive_tasks')
                     .update({ status: newStatus })
                     .eq('id', draggedTaskId);
@@ -408,7 +408,7 @@
 
         async function addTask(status) {
             console.log('addTask called with status:', status);
-            console.log('supabase client:', supabase);
+            console.log('supabase client:', supabaseDB);
             const title = prompt('Task title:');
             if (!title) return;
 
@@ -423,7 +423,7 @@
             try {
                 showSyncIndicator();
 
-                const { error } = await supabase
+                const { error } = await supabaseDB
                     .from('mechasurvive_tasks')
                     .insert([
                         {
@@ -450,7 +450,7 @@
             try {
                 showSyncIndicator();
 
-                const { error } = await supabase
+                const { error } = await supabaseDB
                     .from('mechasurvive_tasks')
                     .delete()
                     .eq('id', taskId);
