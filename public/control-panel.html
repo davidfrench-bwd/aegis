@@ -285,16 +285,26 @@
         }
         
         async function loadSystemHealth() {
-            const { data: states, error } = await sbClient
-                .from('automation_state')
-                .select('*');
+            // Get last execution time per clinic
+            const { data: executions, error } = await sbClient
+                .from('rule_executions')
+                .select('clinic_id, created_at, status')
+                .order('created_at', { ascending: false });
             
             if (error) throw error;
             
-            const html = states && states.length > 0
-                ? states.map(s => {
-                    const lastRun = s.last_run_at ? new Date(s.last_run_at).toLocaleString() : 'Never';
-                    const status = s.status === 'ok' ? 'success' : 'error';
+            // Group by clinic and get most recent
+            const clinicMap = new Map();
+            executions?.forEach(exec => {
+                if (!clinicMap.has(exec.clinic_id)) {
+                    clinicMap.set(exec.clinic_id, exec);
+                }
+            });
+            
+            const html = clinicMap.size > 0
+                ? Array.from(clinicMap.values()).map(s => {
+                    const lastRun = new Date(s.created_at).toLocaleString();
+                    const status = s.status === 'success' ? 'success' : 'error';
                     return `
                         <div class="stat-row">
                             <span class="stat-label">${s.clinic_id}</span>
@@ -366,27 +376,42 @@
         async function loadRecentActivity() {
             const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
             
-            const { data: logs, error } = await sbClient
-                .from('automation_logs')
-                .select('*')
-                .gte('run_at', oneDayAgo)
-                .order('run_at', { ascending: false })
-                .limit(10);
+            const { data: executions, error } = await sbClient
+                .from('rule_executions')
+                .select(`
+                    *,
+                    automation_rules!inner(name, clinic_id)
+                `)
+                .gte('created_at', oneDayAgo)
+                .order('created_at', { ascending: false })
+                .limit(20);
             
-            if (error) throw error;
+            if (error) {
+                console.error('Error loading recent activity:', error);
+                document.getElementById('recentActivity').innerHTML = 
+                    '<div class="empty-state">No automation activity in last 24 hours</div>';
+                return;
+            }
             
-            const html = logs && logs.length > 0
-                ? logs.map(l => {
-                    const time = new Date(l.run_at).toLocaleString();
-                    const statusBadge = l.triggered 
-                        ? '<span class="badge badge-warning">🔥 Triggered</span>'
-                        : '<span class="badge">○ Not triggered</span>';
+            const html = executions && executions.length > 0
+                ? executions.map(exec => {
+                    const time = new Date(exec.created_at).toLocaleString();
+                    const statusBadge = exec.triggered 
+                        ? `<span class="badge badge-warning">🔥 Budget Increased</span>`
+                        : '<span class="badge">○ No action needed</span>';
+                    
+                    const budgetInfo = exec.triggered 
+                        ? `<div class="stat-label">$${exec.old_budget} → $${exec.new_budget}</div>`
+                        : exec.reason 
+                        ? `<div class="stat-label">${exec.reason}</div>`
+                        : '';
                     
                     return `
                         <div class="stat-row">
                             <div>
-                                <div class="stat-value">${l.clinic_id} - ${l.rule_name}</div>
+                                <div class="stat-value">${exec.automation_rules.clinic_id} - ${exec.automation_rules.name}</div>
                                 <div class="stat-label">${time}</div>
+                                ${budgetInfo}
                             </div>
                             <div>${statusBadge}</div>
                         </div>
