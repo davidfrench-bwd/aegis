@@ -322,6 +322,11 @@
                     ? `<span class="badge badge-warning">🔥 Budget Increased</span>`
                     : '<span class="badge">○ No action needed</span>';
                 
+                // Include ad set name if available
+                const adSetInfo = exec.ad_set_name 
+                    ? `<div class="stat-label" style="color: #3b82f6; font-weight: 500;">Ad Set: ${exec.ad_set_name}</div>`
+                    : '';
+                
                 const budgetInfo = exec.triggered && exec.old_budget && exec.new_budget
                     ? `<div class="stat-label">$${exec.old_budget} → $${exec.new_budget}</div>`
                     : exec.reason 
@@ -335,6 +340,7 @@
                         <div>
                             <div class="stat-value">${clinicName}</div>
                             <div class="stat-label">${time}</div>
+                            ${adSetInfo}
                             ${budgetInfo}
                         </div>
                         <div>${statusBadge}</div>

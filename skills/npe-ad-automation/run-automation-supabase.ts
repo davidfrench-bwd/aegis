@@ -36,6 +36,8 @@ interface AutomationRule {
   action_type: string;
   percentage_change: number;
   max_daily_budget: number;
+  campaign_id?: string;
+  campaign_name_filter?: string;
 }
 
 interface ExecutionResult {
@@ -45,6 +47,7 @@ interface ExecutionResult {
   reason: string;
   old_budget?: number;
   new_budget?: number;
+  ad_set_name?: string;
 }
 
 async function loadActiveRules(): Promise<AutomationRule[]> {
@@ -100,7 +103,8 @@ async function logExecution(result: ExecutionResult) {
       triggered: result.triggered,
       reason: result.reason,
       old_budget: result.old_budget,
-      new_budget: result.new_budget
+      new_budget: result.new_budget,
+      ad_set_name: result.ad_set_name
     });
 }
 

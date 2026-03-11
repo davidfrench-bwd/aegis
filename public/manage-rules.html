@@ -329,6 +329,11 @@
                 <label class="form-label">Max Daily Budget ($)</label>
                 <input type="number" id="editMaxBudget" class="form-input" step="0.01">
             </div>
+            <div class="form-group">
+                <label class="form-label">Campaign ID (optional)</label>
+                <input type="text" id="editCampaignId" class="form-input" placeholder="Meta Ads Campaign ID">
+                <small style="color: #8b92a7; font-size: 12px; margin-top: 4px; display: block;">Leave empty to apply to all campaigns, or enter a specific Meta Ads campaign ID</small>
+            </div>
             <button class="btn btn-save" onclick="saveRule()">Save Changes</button>
         </div>
     </div>
@@ -430,6 +435,7 @@
                             Trigger: ${rule.trigger_type} (threshold: ${rule.threshold}) • 
                             Action: ${rule.action_type} (${rule.percentage_change || 0}%) • 
                             Max budget: $${(rule.max_daily_budget / 100).toFixed(2)}/day
+                            ${rule.campaign_id ? ` • <span style="color: #3b82f6;">Campaign: ${rule.campaign_id}</span>` : ''}
                         </div>
                         <div class="rule-details" style="margin-top: 8px; color: #8b92a7;">
                             Last run: ${rule.last_run ? formatLastRun(rule.last_run) : 'Never'}
@@ -465,17 +471,21 @@
             document.getElementById('editThreshold').value = rule.threshold;
             document.getElementById('editPercentage').value = rule.percentage_change || 0;
             document.getElementById('editMaxBudget').value = (rule.max_daily_budget / 100).toFixed(2);
+            document.getElementById('editCampaignId').value = rule.campaign_id || '';
             
             document.getElementById('editModal').style.display = 'block';
         }
         
         async function saveRule() {
             const ruleId = document.getElementById('editRuleId').value;
+            const campaignId = document.getElementById('editCampaignId').value.trim();
+            
             const updates = {
                 name: document.getElementById('editRuleName').value,
                 threshold: parseInt(document.getElementById('editThreshold').value),
                 percentage_change: parseInt(document.getElementById('editPercentage').value),
-                max_daily_budget: Math.round(parseFloat(document.getElementById('editMaxBudget').value) * 100)
+                max_daily_budget: Math.round(parseFloat(document.getElementById('editMaxBudget').value) * 100),
+                campaign_id: campaignId || null
             };
             
             const { error } = await sbClient
