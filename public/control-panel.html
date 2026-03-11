@@ -378,10 +378,7 @@
             
             const { data: executions, error } = await sbClient
                 .from('rule_executions')
-                .select(`
-                    *,
-                    automation_rules!inner(name, clinic_id)
-                `)
+                .select('*')
                 .gte('created_at', oneDayAgo)
                 .order('created_at', { ascending: false })
                 .limit(20);
@@ -389,35 +386,51 @@
             if (error) {
                 console.error('Error loading recent activity:', error);
                 document.getElementById('recentActivity').innerHTML = 
+                    `<div class="empty-state">Error loading activity: ${error.message}</div>`;
+                return;
+            }
+            
+            if (!executions || executions.length === 0) {
+                document.getElementById('recentActivity').innerHTML = 
                     '<div class="empty-state">No automation activity in last 24 hours</div>';
                 return;
             }
             
-            const html = executions && executions.length > 0
-                ? executions.map(exec => {
-                    const time = new Date(exec.created_at).toLocaleString();
-                    const statusBadge = exec.triggered 
-                        ? `<span class="badge badge-warning">🔥 Budget Increased</span>`
-                        : '<span class="badge">○ No action needed</span>';
-                    
-                    const budgetInfo = exec.triggered 
-                        ? `<div class="stat-label">$${exec.old_budget} → $${exec.new_budget}</div>`
-                        : exec.reason 
-                        ? `<div class="stat-label">${exec.reason}</div>`
-                        : '';
-                    
-                    return `
-                        <div class="stat-row">
-                            <div>
-                                <div class="stat-value">${exec.automation_rules.clinic_id} - ${exec.automation_rules.name}</div>
-                                <div class="stat-label">${time}</div>
-                                ${budgetInfo}
-                            </div>
-                            <div>${statusBadge}</div>
+            // Get rule names for executions
+            const ruleIds = [...new Set(executions.map(e => e.rule_id))];
+            const { data: rules } = await sbClient
+                .from('automation_rules')
+                .select('id, name, clinic_id')
+                .in('id', ruleIds);
+            
+            const ruleMap = new Map(rules?.map(r => [r.id, r]) || []);
+            
+            const html = executions.map(exec => {
+                const rule = ruleMap.get(exec.rule_id);
+                const time = new Date(exec.created_at).toLocaleString();
+                const statusBadge = exec.triggered 
+                    ? `<span class="badge badge-warning">🔥 Budget Increased</span>`
+                    : '<span class="badge">○ No action needed</span>';
+                
+                const budgetInfo = exec.triggered && exec.old_budget && exec.new_budget
+                    ? `<div class="stat-label">$${exec.old_budget} → $${exec.new_budget}</div>`
+                    : exec.reason 
+                    ? `<div class="stat-label">${exec.reason}</div>`
+                    : '';
+                
+                const clinicName = rule ? `${rule.clinic_id} - ${rule.name}` : exec.clinic_id;
+                
+                return `
+                    <div class="stat-row">
+                        <div>
+                            <div class="stat-value">${clinicName}</div>
+                            <div class="stat-label">${time}</div>
+                            ${budgetInfo}
                         </div>
-                    `;
-                }).join('')
-                : '<div class="empty-state">No automation activity in last 24 hours</div>';
+                        <div>${statusBadge}</div>
+                    </div>
+                `;
+            }).join('');
             
             document.getElementById('recentActivity').innerHTML = html;
         }
