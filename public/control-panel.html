@@ -269,22 +269,37 @@
         
 
         async function loadTokenCosts() {
-            // Placeholder for now - needs OpenRouter API key in Vercel env
-            // To enable: Add OPENROUTER_API_KEY to Vercel environment variables
-            const html = `
-                <div class="empty-state" style="padding: 40px; text-align: center;">
-                    <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
-                    <div style="color: #8b92a7; margin-bottom: 20px;">
-                        Usage tracking requires OpenRouter API key configuration
+            try {
+                const response = await fetch('/api/openrouter-usage');
+                
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                const html = `
+                    <div class="token-cost">$${data.usage.toFixed(2)}</div>
+                    <div class="stat-label">OpenRouter Usage (Current Month)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${Math.min(data.percentage, 100)}%"></div>
                     </div>
-                    <div style="font-size: 0.875rem; color: #64748b;">
-                        To enable: Add OPENROUTER_API_KEY to Vercel environment variables<br>
-                        Then the /api/openrouter-usage endpoint will return real data
+                    <div class="stat-row" style="margin-top: 15px; border-top: 1px solid #1e2749; padding-top: 15px;">
+                        <span class="stat-label">Monthly Limit</span>
+                        <span class="stat-value">$${data.limit > 0 ? data.limit.toFixed(2) : 'Unlimited'}</span>
                     </div>
-                </div>
-            `;
-            
-            document.getElementById('tokenCosts').innerHTML = html;
+                    <div class="stat-row">
+                        <span class="stat-label">Last Updated</span>
+                        <span class="stat-value">${new Date(data.updated).toLocaleTimeString()}</span>
+                    </div>
+                `;
+                
+                document.getElementById('tokenCosts').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading token costs:', error);
+                document.getElementById('tokenCosts').innerHTML = 
+                    '<div class="empty-state">Unable to load usage data</div>';
+            }
         }
         
         async function loadActiveAutomations() {
