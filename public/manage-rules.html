@@ -331,8 +331,14 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Campaign ID (optional)</label>
-                <input type="text" id="editCampaignId" class="form-input" placeholder="Meta Ads Campaign ID">
+                <input type="text" id="editCampaignId" class="form-input" placeholder="Meta Ads Campaign ID" onchange="checkAdSetCount()">
                 <small style="color: #8b92a7; font-size: 12px; margin-top: 4px; display: block;">Leave empty to apply to all campaigns, or enter a specific Meta Ads campaign ID</small>
+            </div>
+            <div id="adSetCountInfo" style="display: none; margin-bottom: 15px; padding: 10px; background: #1e2749; border-radius: 6px;">
+                <div style="color: #3b82f6; font-weight: 500; font-size: 14px;">
+                    <span id="adSetCountSpinner" style="display: inline-block;">⏳</span>
+                    <span id="adSetCountText">Checking ad sets...</span>
+                </div>
             </div>
             <button class="btn btn-save" onclick="saveRule()">Save Changes</button>
         </div>
@@ -465,7 +471,42 @@
             loadRules();
         }
         
+
+        
+
+        
+        async function deleteRule(ruleId, ruleName) {
+            if (!confirm(`Delete rule "${ruleName}"? This cannot be undone.`)) {
+                return;
+            }
+            
+            const { error } = await sbClient
+                .from('automation_rules')
+                .delete()
+                .eq('id', ruleId);
+            
+            if (error) {
+                showAlert('Failed to delete rule: ' + error.message, 'error');
+                return;
+            }
+            
+            showAlert('Rule deleted successfully', 'success');
+            loadRules();
+        }
+        
+
+        
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => { container.innerHTML = ''; }, 5000);
+        }
+        
+        let checkAdSetTimeout = null;
+        let currentRule = null;
+        
         function editRule(rule) {
+            currentRule = rule; // Store current rule for ad set checking
             document.getElementById('editRuleId').value = rule.id;
             document.getElementById('editRuleName').value = rule.name;
             document.getElementById('editThreshold').value = rule.threshold;
@@ -474,9 +515,62 @@
             document.getElementById('editCampaignId').value = rule.campaign_id || '';
             
             document.getElementById('editModal').style.display = 'block';
+            checkAdSetCount(); // Check ad sets when modal opens
+        }
+        
+        async function checkAdSetCount() {
+            // Clear existing timeout
+            if (checkAdSetTimeout) {
+                clearTimeout(checkAdSetTimeout);
+            }
+            
+            // Debounce the check
+            checkAdSetTimeout = setTimeout(async () => {
+                const campaignId = document.getElementById('editCampaignId').value.trim();
+                const adSetCountDiv = document.getElementById('adSetCountInfo');
+                const adSetCountText = document.getElementById('adSetCountText');
+                const adSetCountSpinner = document.getElementById('adSetCountSpinner');
+                
+                adSetCountDiv.style.display = 'block';
+                adSetCountSpinner.style.display = 'inline-block';
+                adSetCountText.textContent = 'Checking ad sets...';
+                
+                try {
+                    // In a real implementation, this would query Meta Ads API
+                    // For now, we'll simulate checking the ad set count based on the rule
+                    
+                    if (campaignId) {
+                        // Specific campaign ID provided
+                        adSetCountSpinner.style.display = 'none';
+                        adSetCountText.innerHTML = `✅ This rule will apply to ad sets in campaign: <strong>${campaignId}</strong>`;
+                    } else if (currentRule && currentRule.campaign_name_filter) {
+                        // Using campaign name filter
+                        adSetCountSpinner.style.display = 'none';
+                        adSetCountText.innerHTML = `✅ This rule will apply to all active ad sets in campaigns containing "<strong>${currentRule.campaign_name_filter}</strong>"`;
+                    } else {
+                        // No filtering
+                        adSetCountSpinner.style.display = 'none';
+                        adSetCountText.innerHTML = `⚠️ This rule will apply to <strong>ALL active ad sets</strong> for ${currentRule ? currentRule.clinic_id : 'this clinic'}`;
+                    }
+                    
+                    // In production, you would make an API call like:
+                    // const count = await fetchAdSetCount(currentRule.clinic_id, campaignId, currentRule.campaign_name_filter);
+                    // adSetCountText.innerHTML = `✅ This rule will apply to <strong>${count}</strong> ad set(s)`;
+                    
+                } catch (error) {
+                    adSetCountSpinner.style.display = 'none';
+                    adSetCountText.innerHTML = `❌ Error checking ad sets: ${error.message}`;
+                }
+            }, 500); // 500ms debounce
         }
         
         async function saveRule() {
+            // Show ad set count confirmation
+            const adSetCountText = document.getElementById('adSetCountText').textContent;
+            if (!confirm(`${adSetCountText}\n\nContinue saving?`)) {
+                return;
+            }
+            
             const ruleId = document.getElementById('editRuleId').value;
             const campaignId = document.getElementById('editCampaignId').value.trim();
             
@@ -503,33 +597,10 @@
             loadRules();
         }
         
-        async function deleteRule(ruleId, ruleName) {
-            if (!confirm(`Delete rule "${ruleName}"? This cannot be undone.`)) {
-                return;
-            }
-            
-            const { error } = await sbClient
-                .from('automation_rules')
-                .delete()
-                .eq('id', ruleId);
-            
-            if (error) {
-                showAlert('Failed to delete rule: ' + error.message, 'error');
-                return;
-            }
-            
-            showAlert('Rule deleted successfully', 'success');
-            loadRules();
-        }
-        
         function closeModal() {
             document.getElementById('editModal').style.display = 'none';
-        }
-        
-        function showAlert(message, type) {
-            const container = document.getElementById('alertContainer');
-            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-            setTimeout(() => { container.innerHTML = ''; }, 5000);
+            document.getElementById('adSetCountInfo').style.display = 'none';
+            currentRule = null;
         }
         
         // Load on page load
