@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '../../_utils/supabase-server'
+import { createClient } from '@/app/lib/supabase/server'
 
 // Map clinic IDs to Meta Ad Account IDs
 const CLINIC_AD_ACCOUNTS: Record<string, string> = {
@@ -11,7 +11,7 @@ const CLINIC_AD_ACCOUNTS: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServerClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
