@@ -208,19 +208,8 @@
         
         <div id="errorContainer"></div>
         
-        <!-- System Health -->
+        <!-- Token Costs -->
         <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">System Health</div>
-                    <span class="badge badge-success" id="systemStatus">●  Checking...</span>
-                </div>
-                <div id="systemHealth">
-                    <div class="loading">Loading...</div>
-                </div>
-            </div>
-            
-            <!-- Token Costs -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Token Costs</div>
@@ -268,58 +257,17 @@
             
             try {
                 await Promise.all([
-                    loadSystemHealth(),
                     loadTokenCosts(),
                     loadActiveAutomations(),
                     loadRecentActivity()
                 ]);
-                
-                document.getElementById('systemStatus').textContent = '●  All Systems OK';
-                document.getElementById('systemStatus').className = 'badge badge-success';
             } catch (error) {
                 console.error('Error loading data:', error);
                 showError('Failed to load data: ' + error.message);
-                document.getElementById('systemStatus').textContent = '●  Error';
-                document.getElementById('systemStatus').className = 'badge badge-error';
             }
         }
         
-        async function loadSystemHealth() {
-            // Get last execution time per clinic
-            const { data: executions, error } = await sbClient
-                .from('rule_executions')
-                .select('clinic_id, created_at, status')
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            
-            // Group by clinic and get most recent
-            const clinicMap = new Map();
-            executions?.forEach(exec => {
-                if (!clinicMap.has(exec.clinic_id)) {
-                    clinicMap.set(exec.clinic_id, exec);
-                }
-            });
-            
-            const html = clinicMap.size > 0
-                ? Array.from(clinicMap.values()).map(s => {
-                    const lastRun = new Date(s.created_at).toLocaleString();
-                    const status = s.status === 'success' ? 'success' : 'error';
-                    return `
-                        <div class="stat-row">
-                            <span class="stat-label">${s.clinic_id}</span>
-                            <span class="stat-value">
-                                <span class="badge badge-${status}">${s.status.toUpperCase()}</span>
-                                Last run: ${lastRun}
-                            </span>
-                        </div>
-                    `;
-                }).join('')
-                : '<div class="empty-state">No automation runs yet</div>';
-            
-            document.getElementById('systemHealth').innerHTML = html;
-        }
-        
+
         async function loadTokenCosts() {
             // For now, show placeholder - will implement real tracking
             const monthlyBudget = 1000;
