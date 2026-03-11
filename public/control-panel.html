@@ -260,45 +260,30 @@
         }
         
         async function loadActiveAutomations() {
-            console.log('Loading active automations...');
-            
             const { data: rules, error } = await sbClient
                 .from('automation_rules')
                 .select('*')
                 .eq('is_active', true);
             
-            console.log('Query result:', { rules, error });
-            
-            if (error) {
-                console.error('Error loading rules:', error);
-                document.getElementById('activeAutomations').innerHTML = 
-                    `<div class="empty-state">Error: ${error.message}</div>`;
-                return;
-            }
-            
-            console.log(`Found ${rules?.length || 0} active rules`);
+            if (error) throw error;
             
             document.getElementById('automationCount').textContent = `${rules?.length || 0} rules`;
             
             const html = rules && rules.length > 0
-                ? rules.map(r => {
-                    console.log('Rendering rule:', r);
-                    return `
-                        <div class="automation-rule">
-                            <div class="rule-header">
-                                <div class="rule-name">${r.name}</div>
-                                <span class="badge badge-success">Active</span>
-                            </div>
-                            ${r.description ? `<div class="rule-details" style="margin-bottom: 8px; color: #e0e6ed;">${r.description}</div>` : ''}
-                            <div class="rule-details">
-                                ${r.clinic_id} • ${r.trigger_type} (threshold: ${r.threshold}) → ${r.action_type} ${r.percentage_change}%
-                            </div>
+                ? rules.map(r => `
+                    <div class="automation-rule">
+                        <div class="rule-header">
+                            <div class="rule-name">${r.name}</div>
+                            <span class="badge badge-success">Active</span>
                         </div>
-                    `;
-                }).join('')
+                        ${r.description ? `<div class="rule-details" style="margin-bottom: 8px; color: #e0e6ed;">${r.description}</div>` : ''}
+                        <div class="rule-details">
+                            ${r.clinic_id} • ${r.trigger_type} (threshold: ${r.threshold}) → ${r.action_type} ${r.percentage_change}%
+                        </div>
+                    </div>
+                `).join('')
                 : '<div class="empty-state">No active automation rules</div>';
             
-            console.log('Setting HTML:', html);
             document.getElementById('activeAutomations').innerHTML = html;
         }
         
