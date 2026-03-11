@@ -531,35 +531,54 @@
                 const adSetCountText = document.getElementById('adSetCountText');
                 const adSetCountSpinner = document.getElementById('adSetCountSpinner');
                 
+                if (!currentRule) {
+                    return;
+                }
+                
                 adSetCountDiv.style.display = 'block';
                 adSetCountSpinner.style.display = 'inline-block';
-                adSetCountText.textContent = 'Checking ad sets...';
+                adSetCountText.textContent = 'Checking Meta Ads for active ad sets...';
                 
                 try {
-                    // In a real implementation, this would query Meta Ads API
-                    // For now, we'll simulate checking the ad set count based on the rule
+                    // Call the API to get actual ad set count from Meta
+                    const response = await fetch('/api/meta/count-adsets', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            clinic_id: currentRule.clinic_id,
+                            campaign_id: campaignId || null,
+                            campaign_name_filter: currentRule.campaign_name_filter || null
+                        })
+                    });
                     
-                    if (campaignId) {
-                        // Specific campaign ID provided
-                        adSetCountSpinner.style.display = 'none';
-                        adSetCountText.innerHTML = `✅ This rule will apply to ad sets in campaign: <strong>${campaignId}</strong>`;
-                    } else if (currentRule && currentRule.campaign_name_filter) {
-                        // Using campaign name filter
-                        adSetCountSpinner.style.display = 'none';
-                        adSetCountText.innerHTML = `✅ This rule will apply to all active ad sets in campaigns containing "<strong>${currentRule.campaign_name_filter}</strong>"`;
-                    } else {
-                        // No filtering
-                        adSetCountSpinner.style.display = 'none';
-                        adSetCountText.innerHTML = `⚠️ This rule will apply to <strong>ALL active ad sets</strong> for ${currentRule ? currentRule.clinic_id : 'this clinic'}`;
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Failed to fetch ad sets');
                     }
                     
-                    // In production, you would make an API call like:
-                    // const count = await fetchAdSetCount(currentRule.clinic_id, campaignId, currentRule.campaign_name_filter);
-                    // adSetCountText.innerHTML = `✅ This rule will apply to <strong>${count}</strong> ad set(s)`;
+                    adSetCountSpinner.style.display = 'none';
+                    
+                    if (campaignId) {
+                        // Specific campaign ID
+                        adSetCountText.innerHTML = `✅ This rule will apply to <strong>${data.active_ad_sets}</strong> active ad set(s) in campaign ${campaignId}`;
+                    } else if (currentRule.campaign_name_filter) {
+                        // Using campaign name filter
+                        adSetCountText.innerHTML = `✅ This rule will apply to <strong>${data.active_ad_sets}</strong> active ad set(s) in campaigns containing "<strong>${currentRule.campaign_name_filter}</strong>"`;
+                    } else {
+                        // No filtering
+                        adSetCountText.innerHTML = `⚠️ This rule will apply to <strong>${data.active_ad_sets}</strong> active ad set(s) across ALL campaigns for ${currentRule.clinic_id}`;
+                    }
+                    
+                    // Store the count for the save confirmation
+                    adSetCountText.setAttribute('data-count', data.active_ad_sets);
                     
                 } catch (error) {
                     adSetCountSpinner.style.display = 'none';
-                    adSetCountText.innerHTML = `❌ Error checking ad sets: ${error.message}`;
+                    adSetCountText.innerHTML = `❌ Error checking Meta Ads: ${error.message}`;
+                    console.error('Error checking ad sets:', error);
                 }
             }, 500); // 500ms debounce
         }

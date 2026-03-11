@@ -30,15 +30,6 @@ CREATE INDEX idx_mechasurvive_tasks_status ON mechasurvive_tasks(status);
 CREATE INDEX idx_mechasurvive_tasks_sort_order ON mechasurvive_tasks(status, sort_order);
 
 -- Updated timestamp trigger
-CREATE OR REPLACE FUNCTION update_mechasurvive_tasks_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION update_mechasurvive_tasks_updated_at() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER mechasurvive_tasks_updated_at
-    BEFORE UPDATE ON mechasurvive_tasks
-    FOR EACH ROW
-    EXECUTE FUNCTION update_mechasurvive_tasks_updated_at();
+CREATE TRIGGER mechasurvive_tasks_updated_at BEFORE UPDATE ON mechasurvive_tasks FOR EACH ROW EXECUTE FUNCTION update_mechasurvive_tasks_updated_at();
