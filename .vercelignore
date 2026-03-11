@@ -1,1 +1,8 @@
-/agent-chat-system
+agent-chat-system
+aegis-dashboard
+aegis-pages
+ghl-lead-ai
+memory
+.openclaw
+scripts/*.ts
+!scripts/seed-automation-rules.js
