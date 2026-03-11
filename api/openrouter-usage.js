@@ -5,7 +5,7 @@
  * GET https://openrouter.ai/api/v1/auth/key with Authorization header
  */
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -21,17 +21,39 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+    const https = require('https');
+    
+    const options = {
+      hostname: 'openrouter.ai',
+      port: 443,
+      path: '/api/v1/auth/key',
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${apiKey}`
       }
+    };
+
+    const response = await new Promise((resolve, reject) => {
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            resolve({ ok: res.statusCode === 200, json: () => JSON.parse(data), status: res.statusCode });
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
+      req.on('error', reject);
+      req.end();
     });
 
     if (!response.ok) {
       throw new Error(`OpenRouter API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = response.json();
     
     // OpenRouter returns: { data: { limit, usage, rate_limit } }
     // usage is in USD cents
