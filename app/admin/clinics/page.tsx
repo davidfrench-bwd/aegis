@@ -143,41 +143,41 @@ export default function ClinicSettingsPage() {
   if (!authenticated) return null
 
   const styles = {
-    page: { maxWidth: 900, margin: '40px auto', padding: '0 20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' } as const,
-    card: { background: 'white', borderRadius: 8, boxShadow: '0 2px 10px rgba(0,0,0,0.08)', padding: 24, marginBottom: 16 } as const,
+    page: { maxWidth: 900, margin: '0 auto', padding: '40px 20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', minHeight: '100vh', background: 'linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%)', color: '#e0e6ed' } as const,
+    card: { background: '#1a1f3a', borderRadius: 12, border: '1px solid #334155', padding: 24, marginBottom: 16 } as const,
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 } as const,
-    btn: { padding: '10px 20px', background: '#000', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 14 } as const,
-    btnOutline: { padding: '8px 16px', background: 'transparent', color: '#000', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer', fontSize: 13 } as const,
-    btnDanger: { padding: '8px 16px', background: '#fee', color: '#c00', border: '1px solid #fcc', borderRadius: 4, cursor: 'pointer', fontSize: 13 } as const,
-    input: { width: '100%', padding: 10, border: '1px solid #ddd', borderRadius: 4, fontSize: 14, boxSizing: 'border-box' as const } as const,
-    label: { display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600, color: '#333' } as const,
+    btn: { padding: '10px 20px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 14 } as const,
+    btnOutline: { padding: '8px 16px', background: 'transparent', color: '#e0e6ed', border: '1px solid #334155', borderRadius: 6, cursor: 'pointer', fontSize: 13 } as const,
+    btnDanger: { padding: '8px 16px', background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, cursor: 'pointer', fontSize: 13 } as const,
+    input: { width: '100%', padding: 10, border: '1px solid #334155', borderRadius: 6, fontSize: 14, boxSizing: 'border-box' as const, background: '#0a0e27', color: '#e0e6ed' } as const,
+    label: { display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 600, color: '#94a3b8' } as const,
     field: { marginBottom: 16 } as const,
-    badge: (active: boolean) => ({ display: 'inline-block', padding: '2px 8px', borderRadius: 12, fontSize: 12, background: active ? '#e6f9e6' : '#f5f5f5', color: active ? '#060' : '#999' }) as const,
-    hint: { fontSize: 12, color: '#999', marginTop: 4 } as const,
+    badge: (active: boolean) => ({ display: 'inline-block', padding: '2px 8px', borderRadius: 12, fontSize: 12, background: active ? 'rgba(16,185,129,0.15)' : '#334155', color: active ? '#10b981' : '#94a3b8' }) as const,
+    hint: { fontSize: 12, color: '#64748b', marginTop: 4 } as const,
     row: { display: 'flex', gap: 12 } as const,
   }
 
   return (
     <div style={styles.page}>
       <div style={{ marginBottom: 16 }}>
-        <a href="/dashboard.html" style={{ fontSize: 14, color: '#666', textDecoration: 'none' }}>&larr; Back to Dashboard</a>
+        <a href="/dashboard.html" style={{ fontSize: 14, color: '#94a3b8', textDecoration: 'none' }}>&larr; Back to Dashboard</a>
       </div>
       <div style={styles.header}>
-        <h1 style={{ margin: 0, fontSize: 24 }}>Clinic Settings</h1>
+        <h1 style={{ margin: 0, fontSize: 24, color: '#fff' }}>Clinic Settings</h1>
         {!showAdd && !editingId && (
           <button style={styles.btn} onClick={startAdd}>Add Clinic</button>
         )}
       </div>
 
       {message && (
-        <div style={{ padding: 12, marginBottom: 16, background: message.startsWith('Error') ? '#fee' : '#e6f9e6', borderRadius: 4, fontSize: 14 }}>
+        <div style={{ padding: 12, marginBottom: 16, background: message.startsWith('Error') ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)', borderRadius: 6, fontSize: 14, color: message.startsWith('Error') ? '#f87171' : '#10b981', border: `1px solid ${message.startsWith('Error') ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}` }}>
           {message}
         </div>
       )}
 
       {(showAdd || editingId) && (
         <div style={styles.card}>
-          <h2 style={{ margin: '0 0 20px', fontSize: 18 }}>{showAdd ? 'Add Clinic' : 'Edit Clinic'}</h2>
+          <h2 style={{ margin: '0 0 20px', fontSize: 18, color: '#fff' }}>{showAdd ? 'Add Clinic' : 'Edit Clinic'}</h2>
           <form onSubmit={handleSave}>
             <div style={styles.row}>
               <div style={{ ...styles.field, flex: 1 }}>
@@ -253,7 +253,7 @@ export default function ClinicSettingsPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {Object.entries(form.tag_mapping).map(([metric, tag]) => (
                   <div key={metric} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 13, color: '#666', width: 140, flexShrink: 0 }}>{metric}</span>
+                    <span style={{ fontSize: 13, color: '#94a3b8', width: 140, flexShrink: 0 }}>{metric}</span>
                     <input
                       style={{ ...styles.input, padding: 6, fontSize: 13 }}
                       value={tag}
@@ -274,7 +274,7 @@ export default function ClinicSettingsPage() {
                 onChange={e => setForm({ ...form, is_active: e.target.checked })}
                 id="is_active"
               />
-              <label htmlFor="is_active" style={{ fontSize: 14 }}>Active (include in daily refresh)</label>
+              <label htmlFor="is_active" style={{ fontSize: 14, color: '#e0e6ed' }}>Active (include in daily refresh)</label>
             </div>
 
             <div style={{ display: 'flex', gap: 12 }}>
@@ -288,20 +288,20 @@ export default function ClinicSettingsPage() {
       )}
 
       {loading ? (
-        <p style={{ color: '#999' }}>Loading...</p>
+        <p style={{ color: '#64748b' }}>Loading...</p>
       ) : clinics.length === 0 ? (
         <div style={styles.card}>
-          <p style={{ color: '#999', textAlign: 'center' }}>No clinics configured yet. Add one to get started.</p>
+          <p style={{ color: '#64748b', textAlign: 'center' }}>No clinics configured yet. Add one to get started.</p>
         </div>
       ) : (
         clinics.map(clinic => (
           <div key={clinic.id} style={styles.card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <h3 style={{ margin: '0 0 4px', fontSize: 18 }}>
+                <h3 style={{ margin: '0 0 4px', fontSize: 18, color: '#fff' }}>
                   {clinic.clinic_name} <span style={styles.badge(clinic.is_active)}>{clinic.is_active ? 'Active' : 'Inactive'}</span>
                 </h3>
-                <div style={{ fontSize: 13, color: '#999', marginBottom: 12 }}>{clinic.clinic_id}</div>
+                <div style={{ fontSize: 13, color: '#64748b', marginBottom: 12 }}>{clinic.clinic_id}</div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button style={styles.btnOutline} onClick={() => startEdit(clinic)}>Edit</button>
@@ -309,14 +309,14 @@ export default function ClinicSettingsPage() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 24px', fontSize: 14 }}>
-              <div><strong>GHL Location:</strong> {clinic.ghl_location_id || <span style={{ color: '#ccc' }}>Not set</span>}</div>
-              <div><strong>GHL API Key:</strong> {clinic.ghl_api_key || <span style={{ color: '#ccc' }}>Not set</span>}</div>
-              <div><strong>Meta Ad Account:</strong> {clinic.meta_ad_account_id || <span style={{ color: '#ccc' }}>Not set</span>}</div>
-              <div><strong>Meta Token:</strong> {clinic.meta_access_token || <span style={{ color: '#ccc' }}>Not set</span>}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 24px', fontSize: 14, color: '#94a3b8' }}>
+              <div><strong>GHL Location:</strong> {clinic.ghl_location_id || <span style={{ color: '#475569' }}>Not set</span>}</div>
+              <div><strong>GHL API Key:</strong> {clinic.ghl_api_key || <span style={{ color: '#475569' }}>Not set</span>}</div>
+              <div><strong>Meta Ad Account:</strong> {clinic.meta_ad_account_id || <span style={{ color: '#475569' }}>Not set</span>}</div>
+              <div><strong>Meta Token:</strong> {clinic.meta_access_token || <span style={{ color: '#475569' }}>Not set</span>}</div>
             </div>
 
-            <div style={{ marginTop: 12, fontSize: 12, color: '#bbb' }}>
+            <div style={{ marginTop: 12, fontSize: 12, color: '#475569' }}>
               Last updated: {new Date(clinic.updated_at).toLocaleString()}
             </div>
           </div>
