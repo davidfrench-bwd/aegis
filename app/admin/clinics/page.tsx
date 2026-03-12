@@ -160,7 +160,7 @@ export default function ClinicSettingsPage() {
   return (
     <div style={styles.page}>
       <div style={{ marginBottom: 16 }}>
-        <a href="/dashboard.html" style={{ fontSize: 14, color: '#94a3b8', textDecoration: 'none' }}>&larr; Back to Dashboard</a>
+        <a href="/clinic-cards.html" style={{ fontSize: 14, color: '#94a3b8', textDecoration: 'none' }}>&larr; Back to Directory</a>
       </div>
       <div style={styles.header}>
         <h1 style={{ margin: 0, fontSize: 24, color: '#fff' }}>Clinic Settings</h1>
