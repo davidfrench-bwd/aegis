@@ -142,11 +142,12 @@ async function refreshClinic(
     const contacts = await fetchAllContacts(clinic.ghl_api_key, clinic.ghl_location_id)
     const tagCounts = countByTagAndMonth(contacts, tags)
 
-    // Fetch ad spend from Meta if credentials are available
+    // Fetch ad spend from Meta — use per-clinic token or fall back to global env var
     let adSpendByMonth: Record<string, number> = {}
-    if (clinic.meta_ad_account_id && clinic.meta_access_token) {
+    const metaToken = clinic.meta_access_token || process.env.META_ACCESS_TOKEN?.trim()
+    if (clinic.meta_ad_account_id && metaToken) {
       try {
-        adSpendByMonth = await fetchMetaAdSpend(clinic.meta_ad_account_id, clinic.meta_access_token)
+        adSpendByMonth = await fetchMetaAdSpend(clinic.meta_ad_account_id, metaToken)
         console.log(`[CRON] ${clinic.clinic_id}: Fetched Meta ad spend for ${Object.keys(adSpendByMonth).length} months`)
       } catch (err) {
         console.error(`[CRON] ${clinic.clinic_id}: Failed to fetch Meta ad spend:`, err)
