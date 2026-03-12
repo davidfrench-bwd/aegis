@@ -31,7 +31,7 @@
     <script>
         async function loadAnalytics() {
             try {
-                const response = await fetch('/data/apex-pain-solutions-analytics-cache.json?t=' + Date.now());
+                const response = await fetch('/data/apex-analytics-cache.json?t=' + Date.now());
                 const data = await response.json();
                 
                 if (data.error) {
