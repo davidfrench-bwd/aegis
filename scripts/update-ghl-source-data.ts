@@ -92,6 +92,12 @@ async function fetchClinicMetrics(clinic: typeof CLINICS[0]) {
     fs.writeFileSync(analyticsPath, JSON.stringify(analyticsData, null, 2));
     console.log(`✅ Updated analytics cache for ${clinic.name}`);
     
+    // Also copy to legacy filenames for backward compatibility
+    if (clinic.id === 'apex-pain-solutions') {
+      fs.copyFileSync(analyticsPath, path.join(__dirname, '../public/data/apex-analytics-cache.json'));
+      console.log('✅ Updated legacy apex-analytics-cache.json');
+    }
+    
   } catch (error) {
     console.error(`Failed to update ${clinic.name}:`, error);
   }
