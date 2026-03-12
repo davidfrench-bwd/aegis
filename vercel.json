@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/evaluate-rules",
-      "schedule": "0 * * * *"
-    }
-  ]
-}
+{}
