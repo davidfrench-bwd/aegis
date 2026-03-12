@@ -98,14 +98,18 @@ async function main() {
   
   console.log(`Date range: ${startDate.toDateString()} - ${endDate.toDateString()}\n`);
   
-  // Fetch contacts by tag
+  // Fetch contacts by tag (using actual tags from GHL)
   const tags = [
     'quiz-lead',
-    'consultation-booked',
-    'consultation-completed',
-    'consultation-no-show',
-    'exam-scheduled',
-    'new-patient'
+    'consult-booked',
+    'consult-confirmed',
+    'consult-self-scheduled',
+    'consult-no-show',
+    'consult-completed',
+    'exam-booked',
+    'pre-paid',
+    'new-patient',
+    'neuropathy'
   ];
   
   const tagCounts: Record<string, number> = {};
