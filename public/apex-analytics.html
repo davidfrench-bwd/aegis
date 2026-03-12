@@ -32,13 +32,25 @@
     <script>
         async function loadAnalytics() {
             try {
-                const response = await fetch('/api/analytics/apex?t=' + Date.now(), {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache'
-                    }
-                });
+                // Try API endpoint first (for local dev), fall back to static file
+                let response;
+                const isLocal = window.location.hostname === 'localhost';
+                
+                if (isLocal) {
+                    response = await fetch('/api/analytics/apex?t=' + Date.now(), {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
+                        }
+                    });
+                } else {
+                    // For production, use static file with cache busting
+                    response = await fetch('/data/apex-analytics-cache.json?v=' + Date.now(), {
+                        cache: 'no-store'
+                    });
+                }
+                
                 const data = await response.json();
                 
                 if (data.error) {
