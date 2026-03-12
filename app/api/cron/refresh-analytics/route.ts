@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/app/lib/supabase/service'
-import fs from 'fs'
-import path from 'path'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -60,39 +57,12 @@ async function fetchAllContacts(apiKey: string, locationId: string): Promise<Con
   return contacts
 }
 
-function getMonthKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-}
-
-function countByTagAndMonth(contacts: Contact[], tags: string[]): Record<string, Record<string, number>> {
-  const counts: Record<string, Record<string, number>> = {}
-
-  for (const contact of contacts) {
-    if (!contact.tags || !contact.dateAdded) continue
-    const month = getMonthKey(new Date(contact.dateAdded))
-
-    for (const tag of tags) {
-      if (contact.tags.includes(tag)) {
-        if (!counts[month]) counts[month] = {}
-        counts[month][tag] = (counts[month][tag] || 0) + 1
-      }
-    }
-  }
-
-  return counts
-}
-
-/**
- * Fetch monthly ad spend from Meta Marketing API
- * Returns a map of month -> total spend
- */
 async function fetchMetaAdSpend(
   adAccountId: string,
   accessToken: string
 ): Promise<Record<string, number>> {
   const spendByMonth: Record<string, number> = {}
 
-  // Fetch the last 15 months of spend data, grouped by month
   const now = new Date()
   const since = new Date(now.getFullYear() - 1, now.getMonth() - 3, 1)
   const sinceStr = since.toISOString().split('T')[0]
@@ -116,7 +86,6 @@ async function fetchMetaAdSpend(
   const data = await response.json()
 
   for (const row of data.data || []) {
-    // date_start is like "2026-03-01"
     const month = row.date_start?.substring(0, 7)
     if (month && row.spend) {
       spendByMonth[month] = parseFloat(row.spend)
@@ -126,13 +95,42 @@ async function fetchMetaAdSpend(
   return spendByMonth
 }
 
-function getCacheFileName(clinicId: string): string {
-  // Map common short names to existing cache file names
-  if (clinicId === 'apex-pain-solutions' || clinicId === 'apex') return 'apex-analytics-cache.json'
-  return `${clinicId}-analytics-cache.json`
+function getMonthKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
 
-async function refreshClinic(clinic: any): Promise<{ clinic: string; status: string; error?: string }> {
+function countByTagAndMonth(contacts: Contact[], tags: string[]): Record<string, Record<string, number>> {
+  const counts: Record<string, Record<string, number>> = {}
+
+  for (const contact of contacts) {
+    if (!contact.tags || !contact.dateAdded) continue
+    const month = getMonthKey(new Date(contact.dateAdded))
+
+    for (const tag of tags) {
+      if (contact.tags.includes(tag)) {
+        if (!counts[month]) counts[month] = {}
+        counts[month][tag] = (counts[month][tag] || 0) + 1
+      }
+    }
+  }
+
+  return counts
+}
+
+function supabaseHeaders(serviceKey: string) {
+  return {
+    'apikey': serviceKey,
+    'Authorization': `Bearer ${serviceKey}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates,return=minimal',
+  }
+}
+
+async function refreshClinic(
+  clinic: any,
+  supabaseUrl: string,
+  serviceKey: string
+): Promise<{ clinic: string; status: string; error?: string }> {
   if (!clinic.ghl_api_key || !clinic.ghl_location_id) {
     return { clinic: clinic.clinic_id, status: 'skipped', error: 'Missing GHL API key or location ID' }
   }
@@ -155,48 +153,38 @@ async function refreshClinic(clinic: any): Promise<{ clinic: string; status: str
       }
     }
 
-    // Read existing cache
-    const cacheFile = getCacheFileName(clinic.clinic_id)
-    const cachePath = path.join(process.cwd(), 'public', 'data', cacheFile)
-    let cacheData: any = { lastUpdated: 0, locationId: clinic.ghl_location_id, clinicName: clinic.clinic_name, metrics: [] }
+    // Upsert metrics into Supabase for each month
+    const rows = Object.entries(tagCounts).map(([month, counts]) => ({
+      clinic_id: clinic.clinic_id,
+      month,
+      leads: counts[tagMapping.leads] || 0,
+      phone_consults: counts[tagMapping.phoneConsults] || 0,
+      phone_consult_shows: counts[tagMapping.phoneConsultShows] || 0,
+      phone_consult_no_shows: counts[tagMapping.phoneConsultNoShows] || 0,
+      exams: counts[tagMapping.exams] || 0,
+      commits: counts[tagMapping.commits] || 0,
+      self_scheduled: counts[tagMapping.selfScheduled] || 0,
+      ad_spend: adSpendByMonth[month] ?? 0,
+      updated_at: new Date().toISOString(),
+    }))
 
-    if (fs.existsSync(cachePath)) {
-      cacheData = JSON.parse(fs.readFileSync(cachePath, 'utf-8'))
-    }
+    if (rows.length > 0) {
+      const upsertRes = await fetch(
+        `${supabaseUrl}/rest/v1/clinic_metrics`,
+        {
+          method: 'POST',
+          headers: supabaseHeaders(serviceKey),
+          body: JSON.stringify(rows),
+        }
+      )
 
-    // Update metrics for each month that has data from GHL
-    for (const [month, counts] of Object.entries(tagCounts)) {
-      // Use Meta ad spend if available, otherwise preserve existing
-      const existingIndex = cacheData.metrics.findIndex((m: any) => m.month === month)
-      const existingAdSpend = existingIndex >= 0 ? cacheData.metrics[existingIndex].adSpend || 0 : 0
-      const adSpend = adSpendByMonth[month] ?? existingAdSpend
-
-      const monthMetrics = {
-        month,
-        leads: counts[tagMapping.leads] || 0,
-        phoneConsults: counts[tagMapping.phoneConsults] || 0,
-        phoneConsultShows: counts[tagMapping.phoneConsultShows] || 0,
-        phoneConsultNoShows: counts[tagMapping.phoneConsultNoShows] || 0,
-        exams: counts[tagMapping.exams] || 0,
-        commits: counts[tagMapping.commits] || 0,
-        selfScheduled: counts[tagMapping.selfScheduled] || 0,
-        adSpend
-      }
-
-      if (existingIndex >= 0) {
-        cacheData.metrics[existingIndex] = monthMetrics
-      } else {
-        cacheData.metrics.push(monthMetrics)
+      if (!upsertRes.ok) {
+        const err = await upsertRes.text()
+        throw new Error(`Supabase upsert failed: ${upsertRes.status} ${err}`)
       }
     }
 
-    // Sort metrics by month
-    cacheData.metrics.sort((a: any, b: any) => a.month.localeCompare(b.month))
-    cacheData.lastUpdated = Date.now()
-
-    fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2))
-
-    return { clinic: clinic.clinic_id, status: 'updated' }
+    return { clinic: clinic.clinic_id, status: 'updated', error: undefined }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error(`[CRON] Error refreshing ${clinic.clinic_id}:`, message)
@@ -205,7 +193,6 @@ async function refreshClinic(clinic: any): Promise<{ clinic: string; status: str
 }
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret if configured
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
@@ -213,26 +200,35 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createServiceClient()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!.trim()
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!.trim()
 
-  // Fetch active clinic configs from Supabase
-  const { data: clinics, error } = await supabase
-    .from('clinic_settings')
-    .select('*')
-    .eq('is_active', true)
+  // Fetch active clinic configs
+  const settingsRes = await fetch(
+    `${supabaseUrl}/rest/v1/clinic_settings?is_active=eq.true&select=*`,
+    {
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+      },
+      cache: 'no-store',
+    }
+  )
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!settingsRes.ok) {
+    return NextResponse.json({ error: `Supabase error: ${settingsRes.status}` }, { status: 500 })
   }
 
-  if (!clinics || clinics.length === 0) {
+  const clinics = await settingsRes.json()
+
+  if (!Array.isArray(clinics) || clinics.length === 0) {
     return NextResponse.json({ message: 'No active clinics configured' })
   }
 
   const results = []
 
   for (const clinic of clinics) {
-    const result = await refreshClinic(clinic)
+    const result = await refreshClinic(clinic, supabaseUrl, serviceKey)
     results.push(result)
     console.log(`[CRON] ${clinic.clinic_id}: ${result.status}${result.error ? ` (${result.error})` : ''}`)
   }
