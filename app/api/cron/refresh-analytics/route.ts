@@ -82,6 +82,50 @@ function countByTagAndMonth(contacts: Contact[], tags: string[]): Record<string,
   return counts
 }
 
+/**
+ * Fetch monthly ad spend from Meta Marketing API
+ * Returns a map of month -> total spend
+ */
+async function fetchMetaAdSpend(
+  adAccountId: string,
+  accessToken: string
+): Promise<Record<string, number>> {
+  const spendByMonth: Record<string, number> = {}
+
+  // Fetch the last 15 months of spend data, grouped by month
+  const now = new Date()
+  const since = new Date(now.getFullYear() - 1, now.getMonth() - 3, 1)
+  const sinceStr = since.toISOString().split('T')[0]
+  const untilStr = now.toISOString().split('T')[0]
+
+  const url = new URL(`https://graph.facebook.com/v21.0/act_${adAccountId.replace('act_', '')}/insights`)
+  url.searchParams.append('fields', 'spend')
+  url.searchParams.append('time_range', JSON.stringify({ since: sinceStr, until: untilStr }))
+  url.searchParams.append('time_increment', 'monthly')
+  url.searchParams.append('access_token', accessToken)
+  url.searchParams.append('limit', '100')
+
+  const response = await fetch(url.toString())
+
+  if (!response.ok) {
+    const errorBody = await response.text()
+    console.error(`[CRON] Meta API error: ${response.status}`, errorBody)
+    return spendByMonth
+  }
+
+  const data = await response.json()
+
+  for (const row of data.data || []) {
+    // date_start is like "2026-03-01"
+    const month = row.date_start?.substring(0, 7)
+    if (month && row.spend) {
+      spendByMonth[month] = parseFloat(row.spend)
+    }
+  }
+
+  return spendByMonth
+}
+
 function getCacheFileName(clinicId: string): string {
   // Map common short names to existing cache file names
   if (clinicId === 'apex-pain-solutions' || clinicId === 'apex') return 'apex-analytics-cache.json'
@@ -100,6 +144,17 @@ async function refreshClinic(clinic: any): Promise<{ clinic: string; status: str
     const contacts = await fetchAllContacts(clinic.ghl_api_key, clinic.ghl_location_id)
     const tagCounts = countByTagAndMonth(contacts, tags)
 
+    // Fetch ad spend from Meta if credentials are available
+    let adSpendByMonth: Record<string, number> = {}
+    if (clinic.meta_ad_account_id && clinic.meta_access_token) {
+      try {
+        adSpendByMonth = await fetchMetaAdSpend(clinic.meta_ad_account_id, clinic.meta_access_token)
+        console.log(`[CRON] ${clinic.clinic_id}: Fetched Meta ad spend for ${Object.keys(adSpendByMonth).length} months`)
+      } catch (err) {
+        console.error(`[CRON] ${clinic.clinic_id}: Failed to fetch Meta ad spend:`, err)
+      }
+    }
+
     // Read existing cache
     const cacheFile = getCacheFileName(clinic.clinic_id)
     const cachePath = path.join(process.cwd(), 'public', 'data', cacheFile)
@@ -111,6 +166,11 @@ async function refreshClinic(clinic: any): Promise<{ clinic: string; status: str
 
     // Update metrics for each month that has data from GHL
     for (const [month, counts] of Object.entries(tagCounts)) {
+      // Use Meta ad spend if available, otherwise preserve existing
+      const existingIndex = cacheData.metrics.findIndex((m: any) => m.month === month)
+      const existingAdSpend = existingIndex >= 0 ? cacheData.metrics[existingIndex].adSpend || 0 : 0
+      const adSpend = adSpendByMonth[month] ?? existingAdSpend
+
       const monthMetrics = {
         month,
         leads: counts[tagMapping.leads] || 0,
@@ -120,13 +180,10 @@ async function refreshClinic(clinic: any): Promise<{ clinic: string; status: str
         exams: counts[tagMapping.exams] || 0,
         commits: counts[tagMapping.commits] || 0,
         selfScheduled: counts[tagMapping.selfScheduled] || 0,
-        adSpend: 0
+        adSpend
       }
 
-      const existingIndex = cacheData.metrics.findIndex((m: any) => m.month === month)
       if (existingIndex >= 0) {
-        // Preserve existing adSpend
-        monthMetrics.adSpend = cacheData.metrics[existingIndex].adSpend || 0
         cacheData.metrics[existingIndex] = monthMetrics
       } else {
         cacheData.metrics.push(monthMetrics)
