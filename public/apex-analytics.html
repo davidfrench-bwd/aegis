@@ -18,6 +18,7 @@
             </nav>
             <div class="last-update">
                 <span id="lastUpdate">Loading...</span>
+                <button onclick="location.reload(true)" style="margin-left: 10px; padding: 4px 8px; font-size: 0.875rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">↻ Refresh</button>
             </div>
         </header>
 
@@ -39,8 +40,23 @@
                 }
 
                 displayAnalytics(data);
-                document.getElementById('lastUpdate').textContent = 
-                    `Last updated: ${new Date(data.lastUpdated).toLocaleString()}`;
+                const updateTime = new Date(data.lastUpdated);
+                const now = new Date();
+                const hoursAgo = Math.floor((now - updateTime) / (1000 * 60 * 60));
+                const minutesAgo = Math.floor((now - updateTime) / (1000 * 60));
+                
+                let freshnessText = '';
+                if (minutesAgo < 60) {
+                    freshnessText = `(${minutesAgo} minutes ago)`;
+                } else if (hoursAgo < 24) {
+                    freshnessText = `(${hoursAgo} hours ago)`;
+                } else {
+                    const daysAgo = Math.floor(hoursAgo / 24);
+                    freshnessText = `(${daysAgo} days ago)`;
+                }
+                
+                document.getElementById('lastUpdate').innerHTML = 
+                    `Last updated: ${updateTime.toLocaleString()} <span style="color: ${minutesAgo < 360 ? '#10b981' : '#f59e0b'}">${freshnessText}</span>`;
             } catch (error) {
                 console.error('Error loading analytics:', error);
                 document.getElementById('analytics-container').innerHTML = `
