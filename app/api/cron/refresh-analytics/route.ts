@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServiceClient } from '@/app/lib/supabase/service'
 import fs from 'fs'
 import path from 'path'
 
@@ -20,41 +21,6 @@ interface GHLResponse {
     startAfter?: number
   }
 }
-
-interface ClinicConfig {
-  clinicId: string
-  clinicName: string
-  locationId: string
-  apiKeyEnv: string
-  cacheFile: string
-  tags: string[]
-  tagMapping: Record<string, string>
-}
-
-const CLINICS: ClinicConfig[] = [
-  {
-    clinicId: 'apex-pain-solutions',
-    clinicName: 'Apex Pain Solutions',
-    locationId: 'o9ApBFHMmBmZQYAeTByK',
-    apiKeyEnv: 'GHL_APEX_API_KEY',
-    cacheFile: 'apex-analytics-cache.json',
-    tags: [
-      'quiz-lead', 'consult-booked', 'consult-confirmed', 'consult-self-scheduled',
-      'consult-no-show', 'consult-completed', 'exam-booked', 'pre-paid',
-      'new-patient', 'neuropathy'
-    ],
-    tagMapping: {
-      leads: 'quiz-lead',
-      phoneConsults: 'consult-booked',
-      phoneConsultShows: 'consult-completed',
-      phoneConsultNoShows: 'consult-no-show',
-      exams: 'exam-booked',
-      commits: 'pre-paid',
-      selfScheduled: 'consult-self-scheduled',
-    }
-  }
-  // Add more clinics here when API keys are available
-]
 
 async function fetchAllContacts(apiKey: string, locationId: string): Promise<Contact[]> {
   const contacts: Contact[] = []
@@ -116,19 +82,28 @@ function countByTagAndMonth(contacts: Contact[], tags: string[]): Record<string,
   return counts
 }
 
-async function refreshClinic(clinic: ClinicConfig): Promise<{ clinic: string; status: string; error?: string }> {
-  const apiKey = process.env[clinic.apiKeyEnv]
-  if (!apiKey) {
-    return { clinic: clinic.clinicId, status: 'skipped', error: `${clinic.apiKeyEnv} not set` }
+function getCacheFileName(clinicId: string): string {
+  // Map common short names to existing cache file names
+  if (clinicId === 'apex-pain-solutions' || clinicId === 'apex') return 'apex-analytics-cache.json'
+  return `${clinicId}-analytics-cache.json`
+}
+
+async function refreshClinic(clinic: any): Promise<{ clinic: string; status: string; error?: string }> {
+  if (!clinic.ghl_api_key || !clinic.ghl_location_id) {
+    return { clinic: clinic.clinic_id, status: 'skipped', error: 'Missing GHL API key or location ID' }
   }
 
   try {
-    const contacts = await fetchAllContacts(apiKey, clinic.locationId)
-    const tagCounts = countByTagAndMonth(contacts, clinic.tags)
+    const tagMapping = clinic.tag_mapping as Record<string, string>
+    const tags = Object.values(tagMapping)
+
+    const contacts = await fetchAllContacts(clinic.ghl_api_key, clinic.ghl_location_id)
+    const tagCounts = countByTagAndMonth(contacts, tags)
 
     // Read existing cache
-    const cachePath = path.join(process.cwd(), 'public', 'data', clinic.cacheFile)
-    let cacheData: any = { lastUpdated: 0, locationId: clinic.locationId, clinicName: clinic.clinicName, metrics: [] }
+    const cacheFile = getCacheFileName(clinic.clinic_id)
+    const cachePath = path.join(process.cwd(), 'public', 'data', cacheFile)
+    let cacheData: any = { lastUpdated: 0, locationId: clinic.ghl_location_id, clinicName: clinic.clinic_name, metrics: [] }
 
     if (fs.existsSync(cachePath)) {
       cacheData = JSON.parse(fs.readFileSync(cachePath, 'utf-8'))
@@ -138,13 +113,13 @@ async function refreshClinic(clinic: ClinicConfig): Promise<{ clinic: string; st
     for (const [month, counts] of Object.entries(tagCounts)) {
       const monthMetrics = {
         month,
-        leads: counts[clinic.tagMapping.leads] || 0,
-        phoneConsults: counts[clinic.tagMapping.phoneConsults] || 0,
-        phoneConsultShows: counts[clinic.tagMapping.phoneConsultShows] || 0,
-        phoneConsultNoShows: counts[clinic.tagMapping.phoneConsultNoShows] || 0,
-        exams: counts[clinic.tagMapping.exams] || 0,
-        commits: counts[clinic.tagMapping.commits] || 0,
-        selfScheduled: counts[clinic.tagMapping.selfScheduled] || 0,
+        leads: counts[tagMapping.leads] || 0,
+        phoneConsults: counts[tagMapping.phoneConsults] || 0,
+        phoneConsultShows: counts[tagMapping.phoneConsultShows] || 0,
+        phoneConsultNoShows: counts[tagMapping.phoneConsultNoShows] || 0,
+        exams: counts[tagMapping.exams] || 0,
+        commits: counts[tagMapping.commits] || 0,
+        selfScheduled: counts[tagMapping.selfScheduled] || 0,
         adSpend: 0
       }
 
@@ -164,11 +139,11 @@ async function refreshClinic(clinic: ClinicConfig): Promise<{ clinic: string; st
 
     fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2))
 
-    return { clinic: clinic.clinicId, status: 'updated' }
+    return { clinic: clinic.clinic_id, status: 'updated' }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`[CRON] Error refreshing ${clinic.clinicId}:`, message)
-    return { clinic: clinic.clinicId, status: 'error', error: message }
+    console.error(`[CRON] Error refreshing ${clinic.clinic_id}:`, message)
+    return { clinic: clinic.clinic_id, status: 'error', error: message }
   }
 }
 
@@ -181,12 +156,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const supabase = createServiceClient()
+
+  // Fetch active clinic configs from Supabase
+  const { data: clinics, error } = await supabase
+    .from('clinic_settings')
+    .select('*')
+    .eq('is_active', true)
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (!clinics || clinics.length === 0) {
+    return NextResponse.json({ message: 'No active clinics configured' })
+  }
+
   const results = []
 
-  for (const clinic of CLINICS) {
+  for (const clinic of clinics) {
     const result = await refreshClinic(clinic)
     results.push(result)
-    console.log(`[CRON] ${clinic.clinicId}: ${result.status}${result.error ? ` (${result.error})` : ''}`)
+    console.log(`[CRON] ${clinic.clinic_id}: ${result.status}${result.error ? ` (${result.error})` : ''}`)
   }
 
   return NextResponse.json({
