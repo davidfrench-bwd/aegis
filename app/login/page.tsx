@@ -21,7 +21,7 @@ export default function LoginPage() {
       // Check if already logged in
       client.auth.getUser().then(({ data: { user } }) => {
         if (user) {
-          window.location.href = '/apex/automation'
+          window.location.href = '/admin/clinics'
         }
       })
     }
