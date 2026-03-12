@@ -157,12 +157,12 @@ async function main() {
     analyticsData.metrics[marchIndex] = {
       month: '2026-03',
       leads: tagCounts['quiz-lead'] || 0,
-      phoneConsults: tagCounts['consultation-booked'] || 0,
-      phoneConsultShows: tagCounts['consultation-completed'] || 0,
-      phoneConsultNoShows: tagCounts['consultation-no-show'] || 0,
-      exams: tagCounts['exam-scheduled'] || 0,
-      commits: tagCounts['new-patient'] || 0,
-      selfScheduled: 0, // Would need custom field data
+      phoneConsults: tagCounts['consult-booked'] || 0,  // Fixed: consult-booked = phone consults
+      phoneConsultShows: tagCounts['consult-completed'] || 0,
+      phoneConsultNoShows: tagCounts['consult-no-show'] || 0,
+      exams: tagCounts['exam-booked'] || 0,  // Fixed: exam-booked = exams
+      commits: tagCounts['pre-paid'] || tagCounts['new-patient'] || 0,  // pre-paid or new-patient = commits
+      selfScheduled: tagCounts['consult-self-scheduled'] || 0,  // Fixed: using actual self-scheduled tag
       adSpend: 0 // Would need Meta API
     };
     
