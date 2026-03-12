@@ -129,7 +129,8 @@ function supabaseHeaders(serviceKey: string) {
 async function refreshClinic(
   clinic: any,
   supabaseUrl: string,
-  serviceKey: string
+  serviceKey: string,
+  globalMetaToken: string
 ): Promise<{ clinic: string; status: string; error?: string }> {
   if (!clinic.ghl_api_key || !clinic.ghl_location_id) {
     return { clinic: clinic.clinic_id, status: 'skipped', error: 'Missing GHL API key or location ID' }
@@ -144,7 +145,7 @@ async function refreshClinic(
 
     // Fetch ad spend from Meta — use per-clinic token or fall back to global env var
     let adSpendByMonth: Record<string, number> = {}
-    const metaToken = clinic.meta_access_token || process.env.META_ACCESS_TOKEN?.trim()
+    const metaToken = clinic.meta_access_token || globalMetaToken
     if (clinic.meta_ad_account_id && metaToken) {
       try {
         adSpendByMonth = await fetchMetaAdSpend(clinic.meta_ad_account_id, metaToken)
@@ -204,6 +205,23 @@ export async function GET(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!.trim()
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!.trim()
 
+  // Fetch global Meta token from Supabase (falls back to env var)
+  let globalMetaToken = process.env.META_ACCESS_TOKEN?.trim() || ''
+  try {
+    const globalRes = await fetch(
+      `${supabaseUrl}/rest/v1/global_settings?key=eq.meta_access_token&select=value`,
+      { headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` }, cache: 'no-store' }
+    )
+    if (globalRes.ok) {
+      const rows = await globalRes.json()
+      if (rows.length > 0 && rows[0].value) {
+        globalMetaToken = rows[0].value
+      }
+    }
+  } catch (e) {
+    console.error('[CRON] Failed to fetch global Meta token:', e)
+  }
+
   // Fetch active clinic configs
   const settingsRes = await fetch(
     `${supabaseUrl}/rest/v1/clinic_settings?is_active=eq.true&select=*`,
@@ -229,7 +247,7 @@ export async function GET(request: NextRequest) {
   const results = []
 
   for (const clinic of clinics) {
-    const result = await refreshClinic(clinic, supabaseUrl, serviceKey)
+    const result = await refreshClinic(clinic, supabaseUrl, serviceKey, globalMetaToken)
     results.push(result)
     console.log(`[CRON] ${clinic.clinic_id}: ${result.status}${result.error ? ` (${result.error})` : ''}`)
   }

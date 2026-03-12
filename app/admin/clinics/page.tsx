@@ -34,6 +34,9 @@ export default function ClinicSettingsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAdd, setShowAdd] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
+  const [metaToken, setMetaToken] = useState('')
+  const [metaTokenDisplay, setMetaTokenDisplay] = useState('')
+  const [savingMeta, setSavingMeta] = useState(false)
 
   const [form, setForm] = useState({
     clinic_id: '',
@@ -41,7 +44,6 @@ export default function ClinicSettingsPage() {
     ghl_api_key: '',
     ghl_location_id: '',
     meta_ad_account_id: '',
-    meta_access_token: '',
     tag_mapping: { ...DEFAULT_TAG_MAPPING },
     is_active: true,
   })
@@ -57,6 +59,7 @@ export default function ClinicSettingsPage() {
       } else {
         setAuthenticated(true)
         fetchClinics()
+        fetchGlobalSettings()
       }
     })
   }, [])
@@ -69,6 +72,33 @@ export default function ClinicSettingsPage() {
     setLoading(false)
   }
 
+  async function fetchGlobalSettings() {
+    const res = await fetch('/api/admin/global-settings')
+    const data = await res.json()
+    if (Array.isArray(data)) {
+      const token = data.find((r: any) => r.key === 'meta_access_token')
+      if (token) setMetaTokenDisplay(token.value)
+    }
+  }
+
+  async function saveMetaToken() {
+    if (!metaToken) return
+    setSavingMeta(true)
+    const res = await fetch('/api/admin/global-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'meta_access_token', value: metaToken }),
+    })
+    if (res.ok) {
+      setMetaToken('')
+      setMessage('Meta token saved!')
+      fetchGlobalSettings()
+    } else {
+      setMessage('Error: Failed to save Meta token')
+    }
+    setSavingMeta(false)
+  }
+
   function startEdit(clinic: ClinicSetting) {
     setEditingId(clinic.id)
     setShowAdd(false)
@@ -78,7 +108,6 @@ export default function ClinicSettingsPage() {
       ghl_api_key: '',
       ghl_location_id: clinic.ghl_location_id || '',
       meta_ad_account_id: clinic.meta_ad_account_id || '',
-      meta_access_token: '',
       tag_mapping: clinic.tag_mapping || { ...DEFAULT_TAG_MAPPING },
       is_active: clinic.is_active,
     })
@@ -94,7 +123,6 @@ export default function ClinicSettingsPage() {
       ghl_api_key: '',
       ghl_location_id: '',
       meta_ad_account_id: '',
-      meta_access_token: '',
       tag_mapping: { ...DEFAULT_TAG_MAPPING },
       is_active: true,
     })
@@ -169,6 +197,34 @@ export default function ClinicSettingsPage() {
         )}
       </div>
 
+      <div style={styles.card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>Meta Access Token</div>
+            <div style={{ fontSize: 12, color: '#64748b' }}>
+              Shared across all clinics (same Business Manager)
+              {metaTokenDisplay && <span style={{ marginLeft: 8, color: '#94a3b8' }}>Current: {metaTokenDisplay}</span>}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input
+            style={{ ...styles.input, flex: 1 }}
+            type="password"
+            value={metaToken}
+            onChange={e => setMetaToken(e.target.value)}
+            placeholder="Paste new token to update..."
+          />
+          <button
+            style={{ ...styles.btn, whiteSpace: 'nowrap' as const, opacity: metaToken ? 1 : 0.5 }}
+            onClick={saveMetaToken}
+            disabled={!metaToken || savingMeta}
+          >
+            {savingMeta ? 'Saving...' : 'Update Token'}
+          </button>
+        </div>
+      </div>
+
       {message && (
         <div style={{ padding: 12, marginBottom: 16, background: message.startsWith('Error') ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)', borderRadius: 6, fontSize: 14, color: message.startsWith('Error') ? '#f87171' : '#10b981', border: `1px solid ${message.startsWith('Error') ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}` }}>
           {message}
@@ -226,26 +282,14 @@ export default function ClinicSettingsPage() {
               </div>
             </div>
 
-            <div style={styles.row}>
-              <div style={{ ...styles.field, flex: 1 }}>
-                <label style={styles.label}>Meta Ad Account ID</label>
-                <input
-                  style={styles.input}
-                  value={form.meta_ad_account_id}
-                  onChange={e => setForm({ ...form, meta_ad_account_id: e.target.value })}
-                  placeholder="act_123456789"
-                />
-              </div>
-              <div style={{ ...styles.field, flex: 1 }}>
-                <label style={styles.label}>Meta Access Token</label>
-                <input
-                  style={styles.input}
-                  type="password"
-                  value={form.meta_access_token}
-                  onChange={e => setForm({ ...form, meta_access_token: e.target.value })}
-                  placeholder={editingId ? 'Leave blank to keep existing' : 'EAABs...'}
-                />
-              </div>
+            <div style={styles.field}>
+              <label style={styles.label}>Meta Ad Account ID</label>
+              <input
+                style={styles.input}
+                value={form.meta_ad_account_id}
+                onChange={e => setForm({ ...form, meta_ad_account_id: e.target.value })}
+                placeholder="act_123456789"
+              />
             </div>
 
             <div style={styles.field}>
@@ -313,7 +357,6 @@ export default function ClinicSettingsPage() {
               <div><strong>GHL Location:</strong> {clinic.ghl_location_id || <span style={{ color: '#475569' }}>Not set</span>}</div>
               <div><strong>GHL API Key:</strong> {clinic.ghl_api_key || <span style={{ color: '#475569' }}>Not set</span>}</div>
               <div><strong>Meta Ad Account:</strong> {clinic.meta_ad_account_id || <span style={{ color: '#475569' }}>Not set</span>}</div>
-              <div><strong>Meta Token:</strong> {clinic.meta_access_token || <span style={{ color: '#475569' }}>Not set</span>}</div>
             </div>
 
             <div style={{ marginTop: 12, fontSize: 12, color: '#475569' }}>
