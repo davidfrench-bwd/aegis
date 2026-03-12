@@ -203,7 +203,10 @@ export default function ClinicSettingsPage() {
             <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>Meta Access Token</div>
             <div style={{ fontSize: 12, color: '#64748b' }}>
               Shared across all clinics (same Business Manager)
-              {metaTokenDisplay && <span style={{ marginLeft: 8, color: '#94a3b8' }}>Current: {metaTokenDisplay}</span>}
+              {metaTokenDisplay
+                ? <span style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 12, fontSize: 11, background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>Connected {metaTokenDisplay}</span>
+                : <span style={{ marginLeft: 8, padding: '2px 8px', borderRadius: 12, fontSize: 11, background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>Not set</span>
+              }
             </div>
           </div>
         </div>
