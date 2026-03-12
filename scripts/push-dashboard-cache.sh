@@ -22,8 +22,8 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting dashboard cache update" > "$LOG_FI
 for clinic in "${CLINICS[@]}"; do
     echo "Updating dashboard cache for $clinic" | tee -a "$LOG_FILE"
     
-    # Use npx to run TypeScript script
-    npx tsx ~/.openclaw/workspace/scripts/fetch-ghl-data.ts --clinic "$clinic" 2>&1 | tee -a "$LOG_FILE"
+    # Use npx to run TypeScript script (real data version)
+    npx tsx ~/.openclaw/workspace/scripts/fetch-ghl-data-real.ts --clinic "$clinic" 2>&1 | tee -a "$LOG_FILE"
     
     # Check exit status
     if [ ${PIPESTATUS[0]} -eq 0 ]; then
