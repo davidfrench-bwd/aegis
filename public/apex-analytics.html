@@ -32,7 +32,13 @@
     <script>
         async function loadAnalytics() {
             try {
-                const response = await fetch('/data/apex-analytics-cache.json?t=' + Date.now());
+                const response = await fetch('/api/analytics/apex?t=' + Date.now(), {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 const data = await response.json();
                 
                 if (data.error) {
