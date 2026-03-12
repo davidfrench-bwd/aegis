@@ -159,6 +159,9 @@ export default function ClinicSettingsPage() {
 
   return (
     <div style={styles.page}>
+      <div style={{ marginBottom: 16 }}>
+        <a href="/dashboard.html" style={{ fontSize: 14, color: '#666', textDecoration: 'none' }}>&larr; Back to Dashboard</a>
+      </div>
       <div style={styles.header}>
         <h1 style={{ margin: 0, fontSize: 24 }}>Clinic Settings</h1>
         {!showAdd && !editingId && (
