@@ -1,6 +1,6 @@
 {
-  "lastUpdated": 1773066898123,
-  "locationId": "o9ApBFHMmBmZQYAeTByK",
+  "lastUpdated": 1773328137952,
+  "locationId": "iDDjqboB8jXHhSypXEvH",
   "clinicName": "Apex Pain Solutions",
   "metrics": [
     {
@@ -51,8 +51,8 @@
       "month": "2025-05",
       "leads": 188,
       "phoneConsults": 110,
-      "phoneConsultShows": 60,
-      "phoneConsultNoShows": 50,
+      "phoneConsultShows": 61,
+      "phoneConsultNoShows": 49,
       "exams": 41,
       "commits": 16,
       "selfScheduled": 34,
@@ -150,23 +150,23 @@
       "month": "2026-02",
       "leads": 123,
       "phoneConsults": 50,
-      "phoneConsultShows": 33,
-      "phoneConsultNoShows": 17,
+      "phoneConsultShows": 34,
+      "phoneConsultNoShows": 16,
       "exams": 17,
-      "commits": 7,
+      "commits": 4,
       "selfScheduled": 31,
       "adSpend": 6102.41
     },
     {
       "month": "2026-03",
-      "leads": 41,
-      "phoneConsults": 10,
-      "phoneConsultShows": 8,
+      "leads": 21,
+      "phoneConsults": 6,
+      "phoneConsultShows": 4,
       "phoneConsultNoShows": 2,
-      "exams": 3,
+      "exams": 2,
       "commits": 0,
-      "selfScheduled": 6,
-      "adSpend": 2056.95
+      "selfScheduled": 2,
+      "adSpend": 1484.57
     }
   ]
 }
