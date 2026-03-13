@@ -55,7 +55,7 @@ export default function ClinicSettingsPage() {
     )
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
-        window.location.href = '/login'
+        window.location.href = '/login.html'
       } else {
         setAuthenticated(true)
         fetchClinics()
