@@ -5,8 +5,23 @@
 # Runs: 7:30 AM daily via cron job
 # Fetches latest GHL data for each clinic
 
-# Load environment variables
-source ~/.openclaw/.env.local
+# Always run from the workspace so relative paths (like .env.local) resolve predictably
+WORKDIR="/Users/alfredpennyworth/.openclaw/workspace"
+cd "$WORKDIR" || {
+  echo "Failed to cd to $WORKDIR" >&2
+  exit 1
+}
+
+# Load environment variables (optional). Prefer workspace .env.local; fall back to ~/.openclaw/.env.local if present.
+if [ -f "$WORKDIR/.env.local" ]; then
+  set -a
+  source "$WORKDIR/.env.local"
+  set +a
+elif [ -f "$HOME/.openclaw/.env.local" ]; then
+  set -a
+  source "$HOME/.openclaw/.env.local"
+  set +a
+fi
 
 # Clinics to update
 CLINICS=("apex-pain-solutions" "natural-foundations" "thrive-restoration")
