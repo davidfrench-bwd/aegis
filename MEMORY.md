@@ -1,5 +1,23 @@
 # Long-Term Memory Archive
 
+## Critical Workflow Rules
+**ALWAYS PUSH TO GIT** - David can ONLY see changes that are pushed to git. Local changes are invisible. After any fixes or updates:
+1. `git add [files]`
+2. `git commit -m "Clear description"`
+3. `git push origin main`
+
+## Memory Consolidation: 2026-03-16T06:10:50.610Z
+
+*(No significant insights found in recent daily notes.)*
+
+---
+
+## Memory Consolidation: 2026-03-16T06:00:35.478Z
+
+*(No significant insights found in recent daily notes.)*
+
+---
+
 ## Memory Consolidation: 2026-03-11T06:02:12.250Z
 
 ### Insight
